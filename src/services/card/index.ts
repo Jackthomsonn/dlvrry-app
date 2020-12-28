@@ -1,5 +1,5 @@
 import { Subject } from 'rxjs';
 
-export class PaymentService {
+export class CardService {
   static completed: Subject<boolean> = new Subject();
 }

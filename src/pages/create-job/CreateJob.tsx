@@ -6,7 +6,6 @@ import { Button } from "../../components/button";
 import { IJob } from "../../../../dlvrry-backend/functions/src/interfaces/IJob";
 import { IUserData } from "../../interfaces/IUserData";
 import { Job } from "../../services/job";
-import { PaymentService } from "../../services/payment";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { StorageKey } from "../../enums/Storage.enum";
 import percentage from 'calculate-percentages';
@@ -20,31 +19,23 @@ export const CreateJobScreen = () => {
   const [ riderPayout, setRiderPayout ] = useState(undefined);
   const { register, handleSubmit, setValue, errors, getValues } = useForm();
 
-  const onSubmit = (job: IJob) => {
+  const onSubmit = async (job: IJob) => {
     job.cost = job.payout * 100;
     job.payout = riderPayout * 100;
 
-    navigation.navigate('Payment', { cost: job.cost });
+    const userData = await AsyncStorage.getItem(StorageKey.USER_DATA);
+    const user: IUserData = JSON.parse(userData);
 
-    const completedSubscription = PaymentService.completed.subscribe(async (isComplete) => {
-      const userData = await AsyncStorage.getItem(StorageKey.USER_DATA);
-      const user: IUserData = JSON.parse(userData);
+    await Job.createJob(job, user.uid);
 
-      if (isComplete) {
-        await Job.createJob(job, user.uid);
-
-        navigation.goBack();
-
-        completedSubscription.unsubscribe();
-      }
-    });
+    navigation.goBack();
   }
 
   const calculateRiderPayout = () => {
     const wholeAmount = Number(getValues('payout'));
 
     const paymentFee = percentage.of(2.9, wholeAmount) + 0.20;
-    const dlvrryFee = percentage.of(2.5, wholeAmount) + 0.20;
+    const dlvrryFee = percentage.of(6, wholeAmount) + 0.20;
     const amountAfterAllFees = wholeAmount - paymentFee - dlvrryFee;
 
     const payoutFee = percentage.of(0.25, wholeAmount) + 0.10;
