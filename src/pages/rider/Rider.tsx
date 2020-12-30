@@ -1,10 +1,10 @@
-import { IJob } from '../../../../dlvrry-backend/functions/src/interfaces/IJob';
+import { IJob } from 'dlvrry-common';
 import { Info } from '../../components/info';
 import { Map } from '../../components/map';
 import React from 'react';
 import { Route } from "@react-navigation/native";
 
-export interface DriverScreenProps {
+interface RiderScreenProps {
   route: Route<any, {
     params: {
       job: IJob
@@ -12,13 +12,12 @@ export interface DriverScreenProps {
   }>
 }
 
-export function DriverScreen(props: DriverScreenProps) {
-
+export function RiderScreen(props: RiderScreenProps) {
   return (
     <>
       <Map
-        customerAddress={props.route.params.params.job.customerLocation}
-        pickupAddress={props.route.params.params.job.pickupLocation}
+        customerAddress={props.route.params.params.job.customer_location}
+        pickupAddress={props.route.params.params.job.pickup_location}
       />
       <Info job={props.route.params.params.job} />
     </>

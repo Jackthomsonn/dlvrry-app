@@ -1,13 +1,13 @@
-import { DriverScreen } from '../pages/driver/Driver';
 import React from 'react';
+import { RiderScreen } from '../pages/rider/Rider';
 import { createStackNavigator } from '@react-navigation/stack';
 
-const DriverStack = createStackNavigator();
+const RiderStack = createStackNavigator();
 
-export function DriverStackScreen() {
+export function RiderStackScreen() {
   return (
-    <DriverStack.Navigator>
-      <DriverStack.Screen name="Driver" options={{ headerShown: false }} component={DriverScreen} />
-    </DriverStack.Navigator>
+    <RiderStack.Navigator>
+      <RiderStack.Screen name="Rider" options={{ headerShown: false }} component={RiderScreen} />
+    </RiderStack.Navigator>
   );
 }

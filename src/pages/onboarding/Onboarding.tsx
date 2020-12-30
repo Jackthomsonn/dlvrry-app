@@ -78,7 +78,7 @@ export function OnboardingScreen() {
     const loginLink = await User.getLoginLink(user.uid);
     const userData = await AsyncStorage.getItem(StorageKey.USER_DATA);
     const parsedUser: IUserData = JSON.parse(userData);
-    const stripeUserDetails = await User.getStripeUserDetails(parsedUser.uid);
+    const stripeUserDetails = await User.getConnectedAccountDetails(parsedUser.uid);
 
     setLoginLink(loginLink.url);
 
@@ -107,7 +107,7 @@ export function OnboardingScreen() {
     const redirectUri = AuthSession.makeRedirectUri({ useProxy: true });
     const response = await User.getUser(parsedUserData.uid);
 
-    if (response.data().verificationStatus === OnboardingStatus.COMPLETE) {
+    if (response.data() && response.data().verificationStatus === OnboardingStatus.COMPLETE) {
       navigation.navigate('Home');
       return;
     }

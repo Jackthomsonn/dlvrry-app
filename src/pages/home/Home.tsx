@@ -4,7 +4,7 @@ import React, { useEffect, useState } from 'react';
 import AsyncStorage from "@react-native-community/async-storage";
 import { Button } from '../../components/button';
 import { FlatList } from "react-native-gesture-handler";
-import { IJob } from '../../../../dlvrry-backend/functions/src/interfaces/IJob';
+import { IJob } from 'dlvrry-common';
 import { IUserData } from '../../interfaces/IUserData';
 import { Job } from "../../services/job";
 import { JobCard } from '../../components/job-card';
@@ -35,9 +35,8 @@ export function HomeScreen() {
     });
   }
 
-  const getJobsForBusiness = (businessId: string) => {
-    console.log(businessId);
-    Job.getJobsForBusiness(businessId).onSnapshot(jobs => {
+  const getJobsForBusiness = (id: string) => {
+    Job.getJobsForBusiness(id).onSnapshot(jobs => {
       const collection = [];
 
       jobs.docs.forEach(job => {

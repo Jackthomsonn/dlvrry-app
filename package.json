@@ -1,15 +1,13 @@
 {
   "main": "node_modules/expo/AppEntry.js",
   "scripts": {
-    "start:dev": "npm run env:dev && expo start",
-    "start:prod": "npm run env:prod && expo start",
-    "android": "expo start --android",
-    "ios": "expo start --ios",
-    "web": "expo start --web",
+    "start": "npm run env:dev && expo start",
     "eject": "expo eject",
     "generate": "node generator/index",
     "env:dev": "expo-env --env=development",
-    "env:prod": "expo-env --env=prod"
+    "env:prod": "expo-env --env=prod",
+    "deploy:ios": "npm run env:prod && expo build ios --release-channel staging",
+    "deploy:android": "npm run env:prod && expo build android --release-channel staging"
   },
   "dependencies": {
     "@react-native-community/async-storage": "^1.12.1",
@@ -54,7 +52,8 @@
     "babel-preset-expo": "^8.3.0",
     "expo-env": "^1.1.1",
     "mem": ">=4.0.0",
-    "typescript": "~3.9.2"
+    "typescript": "~3.9.2",
+    "dlvrry-common": "https://github.com/Jackthomsonn/dlvrry-common"
   },
   "private": true
 }

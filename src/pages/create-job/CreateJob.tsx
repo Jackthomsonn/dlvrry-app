@@ -3,7 +3,7 @@ import { Text, TextInput, View } from "react-native";
 
 import AsyncStorage from "@react-native-community/async-storage";
 import { Button } from "../../components/button";
-import { IJob } from "../../../../dlvrry-backend/functions/src/interfaces/IJob";
+import { IJob } from "dlvrry-common";
 import { IUserData } from "../../interfaces/IUserData";
 import { Job } from "../../services/job";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -33,13 +33,9 @@ export const CreateJobScreen = () => {
 
   const calculateRiderPayout = () => {
     const wholeAmount = Number(getValues('payout'));
+    const dlvrryFee = percentage.of(12, wholeAmount) + 0.20;
 
-    const paymentFee = percentage.of(2.9, wholeAmount) + 0.20;
-    const dlvrryFee = percentage.of(6, wholeAmount) + 0.20;
-    const amountAfterAllFees = wholeAmount - paymentFee - dlvrryFee;
-
-    const payoutFee = percentage.of(0.25, wholeAmount) + 0.10;
-    const amountAfterPayoutFee = amountAfterAllFees - payoutFee;
+    const amountAfterPayoutFee = wholeAmount - dlvrryFee;
 
     setRiderPayout((amountAfterPayoutFee).toFixed(2));
   }
@@ -51,7 +47,7 @@ export const CreateJobScreen = () => {
         value: true
       },
       min: {
-        message: 'You must enter an amount greater than £5',
+        message: 'You must enter a minimum amount of £5',
         value: 5
       },
       valueAsNumber: true
@@ -60,13 +56,13 @@ export const CreateJobScreen = () => {
     register('customerLocation');
     register('numberOfItems', {
       required: {
-        message: 'You must specify the amount of items exist for this job',
+        message: 'You must specify the amount of items included in this job',
         value: true
       },
       valueAsNumber: true,
       max: {
-        message: 'You can not create a job with more than 10 items',
-        value: 10
+        message: 'You can not create a job with more than 50 items',
+        value: 50
       },
       min: {
         message: 'You must have at least 1 item for a job to be created',

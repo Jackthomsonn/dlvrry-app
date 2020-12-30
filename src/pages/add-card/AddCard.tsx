@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 
 import AsyncStorage from "@react-native-community/async-storage";
 import { CardService } from "../../services/card";
-import { IUserData } from "../../interfaces/IUserData";
+import { IUserData } from '../../interfaces/IUserData';
 import { StorageKey } from "../../enums/Storage.enum";
 import { User } from "../../services/user";
 import { WebView } from 'react-native-webview';

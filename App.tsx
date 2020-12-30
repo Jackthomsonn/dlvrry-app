@@ -3,16 +3,15 @@ import 'firebase/functions';
 import "firebase/firestore";
 
 import React, { useState } from 'react';
-import { decode, encode } from 'base-64'
+import { decode, encode } from 'base-64';
 
 import AsyncStorage from '@react-native-community/async-storage';
 import { AuthStackScreen } from './src/navigation/AuthStackNavigation';
 import Constants from 'expo-constants';
-import { DriverScreen } from './src/pages/driver/Driver';
 import { HomeStackScreen } from './src/navigation/HomeStackNavigation';
 import { NavigationContainer } from '@react-navigation/native';
+import { RiderScreen } from './src/pages/rider/Rider';
 import { SplashScreen } from './src/pages/splash/Splash';
-import { StorageKey } from './src/enums/Storage.enum';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import firebase from 'firebase';
 
@@ -68,7 +67,7 @@ export default function App() {
               <Tab.Screen name="Home" component={HomeStackScreen} options={{
                 tabBarVisible: false,
               }} />
-              <Tab.Screen name="Driver" component={DriverScreen} options={{
+              <Tab.Screen name="Rider" component={RiderScreen} options={{
                 tabBarVisible: false,
               }} />
             </React.Fragment>

@@ -1,7 +1,7 @@
 import { Text, View } from "react-native"
 
 import { Button } from "../button"
-import { IJob } from "../../../../dlvrry-backend/functions/src/interfaces/IJob"
+import { IJob } from "dlvrry-common"
 import { Job } from "../../services/job"
 import React from "react"
 import { useNavigation } from "@react-navigation/native"
@@ -29,7 +29,7 @@ export const Info = (props: InfoProps) => {
       <View style={{ height: '15%', backgroundColor: variables.light, display: 'flex', flexDirection: 'row', justifyContent: 'space-between' }}>
         <View style={{ backgroundColor: variables.tertiaryColor, width: '50%', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
           <Text>Business</Text>
-          <Text style={{ fontWeight: '700', color: variables.dark }}>{props.job.businessName}</Text>
+          <Text style={{ fontWeight: '700', color: variables.dark }}>{props.job.owner_name}</Text>
         </View>
         <View style={{ backgroundColor: variables.tertiaryColor, width: '50%', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
           <Text>Payout</Text>
