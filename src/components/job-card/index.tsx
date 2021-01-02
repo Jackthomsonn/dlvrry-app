@@ -1,4 +1,4 @@
-import { IJob, JobStatus } from 'dlvrry-common';
+import { IJob, JobStatus } from '@dlvrry/dlvrry-common';
 import { StyleSheet, Text, View } from 'react-native';
 
 import { Button } from "../button";
@@ -28,7 +28,7 @@ const styles = StyleSheet.create({
 export interface JobCardProps {
   job: IJob,
   user: { uid: string },
-  role: string
+  account_type: string
 }
 
 export const JobCard = (props: JobCardProps) => {
@@ -69,7 +69,7 @@ export const JobCard = (props: JobCardProps) => {
       return (
         <>
           <Text style={{ color: variables.dark, marginBottom: 12 }}> Awaiting acceptance</Text>
-          <Button type="primary" title={'Cancel job'} onPress={() => cancelJob(props.job.id)} />
+          <Button type="primaryNoBorder" title={'Cancel job'} onPress={() => cancelJob(props.job.id)} />
         </>
       );
     }
@@ -83,9 +83,9 @@ export const JobCard = (props: JobCardProps) => {
         <Text style={{ fontWeight: '300', marginTop: 8, fontSize: 18, color: variables.dark }}>£{(props.job.payout / 100).toFixed(2)} </Text>
         <View style={{ width: 300 - 48, marginTop: 12 }}>
           {
-            props.role === UserRole.RIDER
+            props.account_type === UserRole.RIDER
               ? <Button
-                type="primary"
+                type="primaryNoBorder"
                 title="Accept job"
                 onPress={() => acceptJob(props.job.id, props.user.uid)} />
               : handleJobStatus(props.job.status)

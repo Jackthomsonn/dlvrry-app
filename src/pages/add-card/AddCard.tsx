@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { Route, useNavigation } from "@react-navigation/native";
 
 import AsyncStorage from "@react-native-community/async-storage";
 import { CardService } from "../../services/card";
@@ -6,19 +7,12 @@ import { IUserData } from '../../interfaces/IUserData';
 import { StorageKey } from "../../enums/Storage.enum";
 import { User } from "../../services/user";
 import { WebView } from 'react-native-webview';
-import { useNavigation } from "@react-navigation/native";
 
-export function AddCardScreen() {
+export function AddCardScreen(props: any) {
   const navigation = useNavigation();
   const [ user, setUser ] = useState(undefined);
 
   const setup = async () => {
-    const userData = await AsyncStorage.getItem(StorageKey.USER_DATA)
-    const parsedUserData: IUserData = JSON.parse(userData);
-
-    const user = await User.getUser(parsedUserData.uid);
-
-    setUser(user);
   }
 
   useEffect(() => {
@@ -28,8 +22,9 @@ export function AddCardScreen() {
   return (
     <WebView
       originWhitelist={[ '*' ]}
-      source={{ uri: `https://web-build-taupe.vercel.app/customerId?${ user.data().customerId }` }}
+      source={{ uri: `https://web-build-taupe.vercel.app/?customer_id=${ props.route.params.customer_id }` }}
       onNavigationStateChange={async (e) => {
+        console.log(e);
         if (e.url.includes('success=true')) {
           navigation.goBack();
           CardService.completed.next(true);

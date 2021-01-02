@@ -6,6 +6,7 @@ import { CreateJobScreen } from '../pages/create-job/CreateJob';
 import { HomeScreen } from '../pages/home/Home';
 import { OnboardingScreen } from '../pages/onboarding/Onboarding';
 import { OnboardingStatus } from '../enums/Onboarding';
+import { SignUpScreen } from '../pages/sign-up/SignUp';
 import { StorageKey } from '../enums/Storage.enum';
 import { createStackNavigator } from '@react-navigation/stack';
 
@@ -28,7 +29,7 @@ export function HomeStackScreen() {
       <HomeStack.Navigator>
         <HomeStack.Screen name="Home" component={HomeScreen} options={{ headerShown: false }} />
         <HomeStack.Screen name="Onboarding" component={OnboardingScreen} options={{ headerShown: false }} />
-        <HomeStack.Screen name="Add Card" component={AddCardScreen} options={{ headerShown: false }} />
+        <HomeStack.Screen name="AddCard" component={AddCardScreen} options={{ headerShown: false }} />
         <HomeStack.Screen name="CreateJob" component={CreateJobScreen} options={{ headerShown: false }} />
       </HomeStack.Navigator>
     )
@@ -39,7 +40,7 @@ export function HomeStackScreen() {
       <HomeStack.Navigator>
         <HomeStack.Screen name="Onboarding" component={OnboardingScreen} options={{ headerShown: false }} />
         <HomeStack.Screen name="Home" component={HomeScreen} options={{ headerShown: false }} />
-        <HomeStack.Screen name="Add Card" component={AddCardScreen} options={{ headerShown: false }} />
+        <HomeStack.Screen name="AddCard" component={AddCardScreen} options={{ headerShown: false }} />
         <HomeStack.Screen name="CreateJob" component={CreateJobScreen} options={{ headerShown: false }} />
       </HomeStack.Navigator>
     )

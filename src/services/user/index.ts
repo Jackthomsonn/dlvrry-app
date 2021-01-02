@@ -4,7 +4,7 @@ import Axios, { AxiosResponse } from 'axios';
 import Constants from 'expo-constants';
 import Stripe from 'stripe';
 import firebase from 'firebase'
-import { IUser } from 'dlvrry-common';
+import { IUser } from '@dlvrry/dlvrry-common';
 
 export class User {
   static getConnectedAccountDetails(id: string) {
@@ -15,12 +15,12 @@ export class User {
     });
   }
 
-  static getUserRole(id: string) {
+  static getAccountType(id: string) {
     return new Promise<string>(async (resolve) => {
       const userResponse = await firebase.firestore().collection('users').doc(id).get();
       const user = <IUser>userResponse.data();
 
-      resolve(user.role);
+      resolve(user.account_type);
     })
   }
 
@@ -46,5 +46,20 @@ export class User {
 
   static getUser(id: string) {
     return firebase.firestore().collection('users').doc(id).get();
+  }
+
+  static getCards(id: string) {
+    return new Promise<any>(async (resolve) => {
+      const response = await Axios.post<any, AxiosResponse<any>>(`${ Constants.manifest.extra.functionsUri }/getPaymentCards`, {
+        customer_id: id
+      });
+      const collection = [];
+
+      response.data.data.forEach(d => {
+        collection.push(d.card.last4)
+      });
+
+      resolve(collection);
+    });
   }
 }

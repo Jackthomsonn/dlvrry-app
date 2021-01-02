@@ -1,7 +1,7 @@
 import { Text, View } from "react-native"
 
 import { Button } from "../button"
-import { IJob } from "dlvrry-common"
+import { IJob } from "@dlvrry/dlvrry-common";
 import { Job } from "../../services/job"
 import React from "react"
 import { useNavigation } from "@react-navigation/native"

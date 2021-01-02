@@ -3,7 +3,7 @@ import { Text, TextInput, View } from "react-native";
 
 import AsyncStorage from "@react-native-community/async-storage";
 import { Button } from "../../components/button";
-import { IJob } from "dlvrry-common";
+import { IJob } from "@dlvrry/dlvrry-common";
 import { IUserData } from "../../interfaces/IUserData";
 import { Job } from "../../services/job";
 import { SafeAreaView } from "react-native-safe-area-context";

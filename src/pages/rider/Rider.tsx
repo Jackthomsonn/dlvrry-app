@@ -1,4 +1,4 @@
-import { IJob } from 'dlvrry-common';
+import { IJob } from '@dlvrry/dlvrry-common';
 import { Info } from '../../components/info';
 import { Map } from '../../components/map';
 import React from 'react';

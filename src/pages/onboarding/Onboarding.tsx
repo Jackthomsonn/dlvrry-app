@@ -84,13 +84,13 @@ export function OnboardingScreen() {
 
     if (!stripeUserDetails.requirements.disabled_reason) {
       await AsyncStorage.setItem(StorageKey.ONBOARDING_STATUS, OnboardingStatus.COMPLETE);
-      User.updateUser(parsedUser.uid, { verificationStatus: OnboardingStatus.COMPLETE });
+      User.updateUser(parsedUser.uid, { verification_status: OnboardingStatus.COMPLETE });
       setAccountNeedsVerification(false);
       setIsLoading(false);
       navigation.navigate('Home');
     } else {
       await AsyncStorage.setItem(StorageKey.ONBOARDING_STATUS, OnboardingStatus.NEEDS_VERIFICATION);
-      User.updateUser(parsedUser.uid, { verificationStatus: OnboardingStatus.NEEDS_VERIFICATION });
+      User.updateUser(parsedUser.uid, { verification_status: OnboardingStatus.NEEDS_VERIFICATION });
       setAccountNeedsVerification(true);
       setIsLoading(false);
     }
@@ -107,7 +107,7 @@ export function OnboardingScreen() {
     const redirectUri = AuthSession.makeRedirectUri({ useProxy: true });
     const response = await User.getUser(parsedUserData.uid);
 
-    if (response.data() && response.data().verificationStatus === OnboardingStatus.COMPLETE) {
+    if (response.data() && response.data().verification_status === OnboardingStatus.COMPLETE) {
       navigation.navigate('Home');
       return;
     }

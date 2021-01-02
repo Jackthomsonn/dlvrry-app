@@ -53,7 +53,7 @@ export default function App() {
     setTimeout(() => {
       setLoggedInState(user !== null);
       setIsLoadingState(false);
-    }, 0)
+    }, 5000)
   });
 
   return (
