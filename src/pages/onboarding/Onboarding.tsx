@@ -7,9 +7,9 @@ import AsyncStorage from '@react-native-community/async-storage';
 import { Button } from "../../components/button";
 import Constants from 'expo-constants';
 import { IUserData } from '../../interfaces/IUserData';
-import { OnboardingStatus } from '../../enums/Onboarding';
 import { StorageKey } from '../../enums/Storage.enum';
 import { User } from "../../services/user";
+import { VerificationStatus } from '@dlvrry/dlvrry-common';
 import { useNavigation } from "@react-navigation/native";
 import { variables } from "../../../Variables";
 
@@ -76,21 +76,19 @@ export function OnboardingScreen() {
 
   const getUserStatus = async (user: { uid: string }) => {
     const loginLink = await User.getLoginLink(user.uid);
-    const userData = await AsyncStorage.getItem(StorageKey.USER_DATA);
-    const parsedUser: IUserData = JSON.parse(userData);
-    const stripeUserDetails = await User.getConnectedAccountDetails(parsedUser.uid);
+    const stripeUserDetails = await User.getConnectedAccountDetails(User.storedUser.uid);
 
     setLoginLink(loginLink.url);
 
     if (!stripeUserDetails.requirements.disabled_reason) {
-      await AsyncStorage.setItem(StorageKey.ONBOARDING_STATUS, OnboardingStatus.COMPLETE);
-      User.updateUser(parsedUser.uid, { verification_status: OnboardingStatus.COMPLETE });
+      await AsyncStorage.setItem(StorageKey.ONBOARDING_STATUS, VerificationStatus.COMPLETED);
+      User.updateUser(User.storedUser.uid, { verification_status: VerificationStatus.COMPLETED });
       setAccountNeedsVerification(false);
       setIsLoading(false);
       navigation.navigate('Home');
     } else {
-      await AsyncStorage.setItem(StorageKey.ONBOARDING_STATUS, OnboardingStatus.NEEDS_VERIFICATION);
-      User.updateUser(parsedUser.uid, { verification_status: OnboardingStatus.NEEDS_VERIFICATION });
+      await AsyncStorage.setItem(StorageKey.ONBOARDING_STATUS, VerificationStatus.NEEDS_VERIFICATION);
+      User.updateUser(User.storedUser.uid, { verification_status: VerificationStatus.NEEDS_VERIFICATION });
       setAccountNeedsVerification(true);
       setIsLoading(false);
     }
@@ -105,9 +103,8 @@ export function OnboardingScreen() {
     const userData = await AsyncStorage.getItem(StorageKey.USER_DATA);
     const parsedUserData: IUserData = JSON.parse(userData);
     const redirectUri = AuthSession.makeRedirectUri({ useProxy: true });
-    const response = await User.getUser(parsedUserData.uid);
 
-    if (response.data() && response.data().verification_status === OnboardingStatus.COMPLETE) {
+    if (User.storedUser && User.storedUser.verification_status === VerificationStatus.COMPLETED) {
       navigation.navigate('Home');
       return;
     }
@@ -116,7 +113,7 @@ export function OnboardingScreen() {
 
     const onboardingStatus = await AsyncStorage.getItem(StorageKey.ONBOARDING_STATUS);
 
-    if (onboardingStatus === OnboardingStatus.NEEDS_VERIFICATION) {
+    if (onboardingStatus === VerificationStatus.NEEDS_VERIFICATION) {
       setAccountNeedsVerification(true);
       getUserStatus(parsedUserData);
       setIsLoading(false);
@@ -127,7 +124,7 @@ export function OnboardingScreen() {
         redirectUri
       );
 
-      await AsyncStorage.setItem(StorageKey.ONBOARDING_STATUS, OnboardingStatus.IN_PROGRESS);
+      await AsyncStorage.setItem(StorageKey.ONBOARDING_STATUS, VerificationStatus.PENDING);
 
       const result = await AuthSession.startAsync({
         authUrl: `${ response }?redirect_uri=${ redirectUri }`
@@ -136,7 +133,7 @@ export function OnboardingScreen() {
       if (result.type === 'success') {
         getUserStatus(parsedUserData);
       } else {
-        await AsyncStorage.setItem(StorageKey.ONBOARDING_STATUS, OnboardingStatus.CANCELLED);
+        await AsyncStorage.setItem(StorageKey.ONBOARDING_STATUS, VerificationStatus.CANCELLED);
       }
     }
   }

@@ -7,7 +7,7 @@ import React, { useEffect, useState } from "react";
 import Constants from 'expo-constants';
 import MapViewDirections from "react-native-maps-directions"
 
-export interface MapProps {
+interface MapProps {
   customerAddress: {
     latitude: number,
     longitude: number

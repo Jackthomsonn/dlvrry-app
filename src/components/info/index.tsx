@@ -7,7 +7,7 @@ import React from "react"
 import { useNavigation } from "@react-navigation/native"
 import { variables } from "../../../Variables"
 
-export interface InfoProps {
+interface InfoProps {
   job: IJob
 }
 

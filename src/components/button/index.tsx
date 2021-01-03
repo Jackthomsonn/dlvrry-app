@@ -55,7 +55,7 @@ const styles = StyleSheet.create({
   }
 });
 
-export interface ButtonProps {
+interface ButtonProps {
   onPress: Function;
   title: string;
   type: 'primary' | 'primaryNoBorder' | 'secondary' | 'disabled' | 'light';

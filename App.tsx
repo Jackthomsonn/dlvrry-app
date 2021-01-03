@@ -9,9 +9,11 @@ import AsyncStorage from '@react-native-community/async-storage';
 import { AuthStackScreen } from './src/navigation/AuthStackNavigation';
 import Constants from 'expo-constants';
 import { HomeStackScreen } from './src/navigation/HomeStackNavigation';
+import { IUser } from '@dlvrry/dlvrry-common';
 import { NavigationContainer } from '@react-navigation/native';
 import { RiderScreen } from './src/pages/rider/Rider';
 import { SplashScreen } from './src/pages/splash/Splash';
+import { User } from './src/services/user';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import firebase from 'firebase';
 
@@ -50,10 +52,14 @@ export default function App() {
   // firebase.auth().signOut();
 
   firebase.auth().onAuthStateChanged(async (user) => {
-    setTimeout(() => {
-      setLoggedInState(user !== null);
-      setIsLoadingState(false);
-    }, 5000)
+    if (user !== null) {
+      User.getUser(user.uid).onSnapshot((user: any) => {
+        User.storedUser = user.data();
+      });
+    }
+
+    setLoggedInState(user !== null);
+    setIsLoadingState(false);
   });
 
   return (

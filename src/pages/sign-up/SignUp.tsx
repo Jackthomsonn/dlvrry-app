@@ -114,7 +114,7 @@ export function SignUpScreen() {
         }
 
         <Text style={{ marginBottom: 8 }}>Email</Text>
-        <TextInput style={styles.input} onChangeText={value => setValue('email', value)}></TextInput>
+        <TextInput keyboardType="email-address" style={styles.input} onChangeText={value => setValue('email', value)}></TextInput>
 
         {
           errors.email

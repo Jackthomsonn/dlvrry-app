@@ -1,27 +1,20 @@
-import { IUserData } from './../../interfaces/IUserData';
 import Axios, { AxiosResponse } from 'axios';
 
 import Constants from 'expo-constants';
+import { IUser } from '@dlvrry/dlvrry-common';
+import { IUserData } from './../../interfaces/IUserData';
 import Stripe from 'stripe';
 import firebase from 'firebase'
-import { IUser } from '@dlvrry/dlvrry-common';
 
 export class User {
+  static storedUser: IUser = undefined;
+
   static getConnectedAccountDetails(id: string) {
     return new Promise<Stripe.Account>(resolve => {
       Axios.post<string, AxiosResponse<Stripe.Account>>(`${ Constants.manifest.extra.functionsUri }/getConnectedAccountDetails`, { id }).then(async (response) => {
         resolve(response.data);
       });
     });
-  }
-
-  static getAccountType(id: string) {
-    return new Promise<string>(async (resolve) => {
-      const userResponse = await firebase.firestore().collection('users').doc(id).get();
-      const user = <IUser>userResponse.data();
-
-      resolve(user.account_type);
-    })
   }
 
   static getLoginLink(id: string) {
@@ -40,12 +33,18 @@ export class User {
     })
   }
 
-  static updateUser(id: string, data: any) {
-    return firebase.firestore().collection('users').doc(id).update(data);
+  static async updateUser(id: string, data: any) {
+    await firebase.firestore().collection('users').doc(id).update(data);
+
+    const user = User.getUser(id);
+
+    const newUserData = await user.get();
+
+    User.storedUser = <IUser>newUserData.data();
   }
 
   static getUser(id: string) {
-    return firebase.firestore().collection('users').doc(id).get();
+    return firebase.firestore().collection('users').doc(id);
   }
 
   static getCards(id: string) {
@@ -53,10 +52,11 @@ export class User {
       const response = await Axios.post<any, AxiosResponse<any>>(`${ Constants.manifest.extra.functionsUri }/getPaymentCards`, {
         customer_id: id
       });
+
       const collection = [];
 
-      response.data.data.forEach(d => {
-        collection.push(d.card.last4)
+      response.data.data.forEach(cards => {
+        collection.push(cards.card.last4);
       });
 
       resolve(collection);

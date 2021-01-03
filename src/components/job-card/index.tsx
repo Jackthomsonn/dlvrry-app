@@ -1,10 +1,10 @@
 import { IJob, JobStatus } from '@dlvrry/dlvrry-common';
 import { StyleSheet, Text, View } from 'react-native';
 
+import { AccountType } from '../../enums/AccountType';
 import { Button } from "../button";
 import { Job } from '../../services/job';
 import React from 'react';
-import { UserRole } from '../../enums/UserRole';
 import { useNavigation } from "@react-navigation/native";
 import { variables } from "../../../Variables";
 
@@ -25,7 +25,7 @@ const styles = StyleSheet.create({
   }
 })
 
-export interface JobCardProps {
+interface JobCardProps {
   job: IJob,
   user: { uid: string },
   account_type: string
@@ -83,7 +83,7 @@ export const JobCard = (props: JobCardProps) => {
         <Text style={{ fontWeight: '300', marginTop: 8, fontSize: 18, color: variables.dark }}>£{(props.job.payout / 100).toFixed(2)} </Text>
         <View style={{ width: 300 - 48, marginTop: 12 }}>
           {
-            props.account_type === UserRole.RIDER
+            props.account_type === AccountType.RIDER
               ? <Button
                 type="primaryNoBorder"
                 title="Accept job"

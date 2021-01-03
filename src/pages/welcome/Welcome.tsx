@@ -1,14 +1,6 @@
-import * as Google from 'expo-google-app-auth';
-
 import { Button, Image, SafeAreaView, StyleSheet, Text, View } from 'react-native';
 
-import AsyncStorage from '@react-native-community/async-storage';
-import { IUserData } from '../../interfaces/IUserData';
 import React from 'react';
-import { StorageKey } from '../../enums/Storage.enum';
-import { User } from '../../services/user';
-import { UserRole } from '../../enums/UserRole';
-import firebase from 'firebase';
 import { useNavigation } from '@react-navigation/native';
 import { variables } from '../../../Variables';
 

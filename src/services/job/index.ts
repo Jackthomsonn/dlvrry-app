@@ -19,7 +19,10 @@ export class Job {
   }
 
   static async acceptJob(id: string, rider_id: string) {
-    return firebase.firestore().collection('jobs').doc(id).update({ status: JobStatus.IN_PROGRESS, rider_id: rider_id });
+    return firebase.firestore().collection('jobs').doc(id).update({
+      status: JobStatus.IN_PROGRESS,
+      rider_id: rider_id
+    });
   }
 
   static async cancelJob(id: string) {
@@ -31,9 +34,7 @@ export class Job {
 
     const rider_id = jobData.data().rider_id;
 
-    const user = await User.getUser(rider_id);
-
-    let cancelled_jobs = user.data().cancelled_jobs;
+    let cancelled_jobs = User.storedUser.cancelled_jobs;
 
     await User.updateUser(rider_id, { cancelled_jobs: cancelled_jobs + 1 });
   }

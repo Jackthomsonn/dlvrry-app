@@ -5,9 +5,8 @@ import AsyncStorage from '@react-native-community/async-storage';
 import { CreateJobScreen } from '../pages/create-job/CreateJob';
 import { HomeScreen } from '../pages/home/Home';
 import { OnboardingScreen } from '../pages/onboarding/Onboarding';
-import { OnboardingStatus } from '../enums/Onboarding';
-import { SignUpScreen } from '../pages/sign-up/SignUp';
 import { StorageKey } from '../enums/Storage.enum';
+import { VerificationStatus } from '@dlvrry/dlvrry-common';
 import { createStackNavigator } from '@react-navigation/stack';
 
 const HomeStack = createStackNavigator();
@@ -49,7 +48,7 @@ export function HomeStackScreen() {
   useEffect(() => { })
 
   return (
-    onboardingStatus === OnboardingStatus.COMPLETE
+    onboardingStatus === VerificationStatus.COMPLETED
       ? accountIsVerified()
       : accountIsNotVerified()
   );

@@ -1,7 +1,6 @@
-import { AccountType, IJob } from '@dlvrry/dlvrry-common';
-import { ActivityIndicator, Image, Linking, SafeAreaView, Text, View } from 'react-native';
+import { AccountType, IJob, IUser } from '@dlvrry/dlvrry-common';
+import { ActivityIndicator, Linking, SafeAreaView, Text, View } from 'react-native';
 import { FlatList, ScrollView, TouchableOpacity } from "react-native-gesture-handler";
-import { Link, useNavigation } from "@react-navigation/native";
 import React, { createRef, useEffect, useState } from 'react';
 
 import ActionSheet from "react-native-actions-sheet";
@@ -13,8 +12,8 @@ import { Job } from "../../services/job";
 import { JobCard } from '../../components/job-card';
 import { StorageKey } from '../../enums/Storage.enum';
 import { User } from "../../services/user";
-import { UserRole } from '../../enums/UserRole';
 import firebase from 'firebase';
+import { useNavigation } from "@react-navigation/native";
 import { variables } from "../../../Variables";
 
 const actionSheetRef: any = createRef();
@@ -59,11 +58,7 @@ export function HomeScreen() {
   }
 
   const getCards = async () => {
-    const userData = await AsyncStorage.getItem(StorageKey.USER_DATA)
-    const parsedUserData: IUserData = JSON.parse(userData);
-    const user = await User.getUser(parsedUserData.uid);
-
-    const response = await User.getCards(user.data().customer_id);
+    const response = await User.getCards(User.storedUser.customer_id);
 
     setCards(response);
   }
@@ -72,25 +67,20 @@ export function HomeScreen() {
     const userData = await AsyncStorage.getItem(StorageKey.USER_DATA)
     const parsedUserData: IUserData = JSON.parse(userData);
 
-    const user = await User.getUser(parsedUserData.uid);
-    await navigation.navigate('AddCard', { customer_id: user.data().customer_id });
+    await navigation.navigate('AddCard', { customer_id: User.storedUser.customer_id });
 
     actionSheetRef.current?.hide();
   }
 
   const setup = async () => {
-    const userData = await AsyncStorage.getItem(StorageKey.USER_DATA)
-    const user: IUserData = JSON.parse(userData);
-    const accountType: string = await User.getAccountType(user.uid);
-
     setUser(user);
-    setUserRole(accountType);
+    setUserRole(User.storedUser.account_type);
 
-    if (accountType === UserRole.RIDER) {
+    if (User.storedUser.account_type === AccountType.RIDER) {
       getJobs();
     }
 
-    if (accountType === UserRole.BUSINESS) {
+    if (User.storedUser.account_type === AccountType.BUSINESS) {
       getJobsForBusiness(user.uid);
     }
 
@@ -110,7 +100,7 @@ export function HomeScreen() {
           ? <View style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', flex: 1 }}>
             <ActivityIndicator />
           </View>
-          : userRole === UserRole.RIDER
+          : userRole === AccountType.RIDER
             ? <>
               <View style={{ paddingTop: 24, paddingLeft: 24, paddingRight: 24, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
                 <>
