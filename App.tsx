@@ -9,7 +9,6 @@ import AsyncStorage from '@react-native-community/async-storage';
 import { AuthStackScreen } from './src/navigation/AuthStackNavigation';
 import Constants from 'expo-constants';
 import { HomeStackScreen } from './src/navigation/HomeStackNavigation';
-import { IUser } from '@dlvrry/dlvrry-common';
 import { NavigationContainer } from '@react-navigation/native';
 import { RiderScreen } from './src/pages/rider/Rider';
 import { SplashScreen } from './src/pages/splash/Splash';
@@ -23,9 +22,16 @@ if (!global[ 'atob' ]) { global[ 'atob' ] = decode }
 
 const Tab = createBottomTabNavigator();
 
+// AsyncStorage.clear();
+// firebase.auth().signOut();
+// User.storedUser = undefined
+
 export default function App() {
   const [ isLoggedIn, setLoggedInState ] = useState(false);
   const [ isLoading, setIsLoadingState ] = useState(true);
+  const [ activeUser, setActiveUser ] = useState(undefined);
+
+  User.requestAndSetStoredUser();
 
   if (firebase.apps.length === 0) {
     const fi = firebase.initializeApp({
@@ -48,18 +54,36 @@ export default function App() {
     }
   }
 
-  // AsyncStorage.clear();
-  // firebase.auth().signOut();
+  firebase.auth().onAuthStateChanged(async user => {
+    setActiveUser(user);
 
-  firebase.auth().onAuthStateChanged(async (user) => {
-    if (user !== null) {
-      User.getUser(user.uid).onSnapshot((user: any) => {
-        User.storedUser = user.data();
-      });
+    if (user && User.storedUser && User.storedUser.id) {
+      setLoggedInState(user !== null);
+      setIsLoadingState(false);
+    } else {
+      setIsLoadingState(false);
+    }
+  });
+
+  User.authenticated.subscribe(async (isAuthenticated: boolean) => {
+    if (!isAuthenticated) {
+      setIsLoadingState(false);
+      setLoggedInState(false);
+
+      return;
     }
 
-    setLoggedInState(user !== null);
-    setIsLoadingState(false);
+    if (!User.storedUser) {
+      try {
+        await User.setupStoredUser(activeUser);
+        setIsLoadingState(false);
+        setLoggedInState(true);
+      } catch (e) {
+        return e;
+      }
+    } else {
+      setLoggedInState(true);
+    }
   });
 
   return (

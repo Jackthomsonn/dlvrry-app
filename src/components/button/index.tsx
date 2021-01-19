@@ -1,4 +1,4 @@
-import { StyleSheet, Text } from 'react-native';
+import { ActivityIndicator, StyleSheet, Text } from 'react-native';
 
 import React from 'react';
 import { TouchableOpacity } from "react-native-gesture-handler";
@@ -59,12 +59,18 @@ interface ButtonProps {
   onPress: Function;
   title: string;
   type: 'primary' | 'primaryNoBorder' | 'secondary' | 'disabled' | 'light';
+  loading?: boolean;
+  loaderColor?: string;
 }
 
 export const Button = (props: ButtonProps) => {
   return (
     <TouchableOpacity style={styles[ props.type ]} onPress={() => props.onPress()}>
-      <Text style={styles[ props.type + 'Text' ]}> {props.title}</Text>
+      {
+        props.loading
+          ? <ActivityIndicator color={props.loaderColor ? props.loaderColor : variables.light} size={15} />
+          : <Text style={styles[ props.type + 'Text' ]}> {props.title}</Text>
+      }
     </TouchableOpacity>
   )
 }

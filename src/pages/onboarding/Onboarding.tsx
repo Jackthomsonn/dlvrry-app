@@ -1,34 +1,24 @@
 import * as AuthSession from 'expo-auth-session';
 
 import { ActivityIndicator, Linking, SafeAreaView, StyleSheet, Text, View } from 'react-native';
+import { IUser, VerificationStatus } from 'dlvrry-common';
 import React, { useEffect, useState } from 'react';
 
 import AsyncStorage from '@react-native-community/async-storage';
 import { Button } from "../../components/button";
 import Constants from 'expo-constants';
+import { Header } from '../../components/header';
 import { IUserData } from '../../interfaces/IUserData';
 import { StorageKey } from '../../enums/Storage.enum';
 import { User } from "../../services/user";
-import { VerificationStatus } from '@dlvrry/dlvrry-common';
 import { useNavigation } from "@react-navigation/native";
 import { variables } from "../../../Variables";
 
 const styles = StyleSheet.create({
-  mainHost: {
+  host: {
     flex: 1,
     backgroundColor: '#FFF',
     justifyContent: 'center'
-  },
-  header: {
-    paddingTop: 24,
-    paddingLeft: 24,
-    paddingRight: 24,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center'
-  },
-  row: {
-    flexDirection: 'row'
   },
   primaryText: {
     color: variables.dark,
@@ -74,23 +64,34 @@ export function OnboardingScreen() {
   const [ user, setUser ] = useState(undefined);
   const [ isLoading, setIsLoading ] = useState(false);
 
-  const getUserStatus = async (user: { uid: string }) => {
-    const loginLink = await User.getLoginLink(user.uid);
-    const stripeUserDetails = await User.getConnectedAccountDetails(User.storedUser.uid);
+  const getUserStatus = async (user: IUser) => {
+    try {
+      const loginLink = await User.getLoginLink(user.id);
+      const stripeUserDetails = await User.getConnectedAccountDetails(user.id);
 
-    setLoginLink(loginLink.url);
+      setLoginLink(loginLink.data.url);
 
-    if (!stripeUserDetails.requirements.disabled_reason) {
-      await AsyncStorage.setItem(StorageKey.ONBOARDING_STATUS, VerificationStatus.COMPLETED);
-      User.updateUser(User.storedUser.uid, { verification_status: VerificationStatus.COMPLETED });
-      setAccountNeedsVerification(false);
-      setIsLoading(false);
-      navigation.navigate('Home');
-    } else {
-      await AsyncStorage.setItem(StorageKey.ONBOARDING_STATUS, VerificationStatus.NEEDS_VERIFICATION);
-      User.updateUser(User.storedUser.uid, { verification_status: VerificationStatus.NEEDS_VERIFICATION });
-      setAccountNeedsVerification(true);
-      setIsLoading(false);
+      if (!stripeUserDetails.data.requirements.disabled_reason) {
+        await AsyncStorage.setItem(StorageKey.ONBOARDING_STATUS, VerificationStatus.COMPLETED);
+
+        User.updateUser(User.storedUser.id, { verification_status: VerificationStatus.COMPLETED });
+
+        setAccountNeedsVerification(false);
+
+        setIsLoading(false);
+
+        navigation.navigate('Home');
+      } else {
+        await AsyncStorage.setItem(StorageKey.ONBOARDING_STATUS, VerificationStatus.NEEDS_VERIFICATION);
+
+        User.updateUser(User.storedUser.id, { verification_status: VerificationStatus.NEEDS_VERIFICATION });
+
+        setAccountNeedsVerification(true);
+
+        setIsLoading(false);
+      }
+    } catch (e) {
+      alert(e);
     }
   }
 
@@ -100,53 +101,52 @@ export function OnboardingScreen() {
   }
 
   const setup = async () => {
-    const userData = await AsyncStorage.getItem(StorageKey.USER_DATA);
-    const parsedUserData: IUserData = JSON.parse(userData);
-    const redirectUri = AuthSession.makeRedirectUri({ useProxy: true });
+    try {
+      const userData = await AsyncStorage.getItem(StorageKey.USER_DATA);
+      const parsedUserData: IUserData = JSON.parse(userData);
+      const redirectUri = AuthSession.makeRedirectUri({ useProxy: true });
 
-    if (User.storedUser && User.storedUser.verification_status === VerificationStatus.COMPLETED) {
-      navigation.navigate('Home');
-      return;
-    }
-
-    setUser(parsedUserData);
-
-    const onboardingStatus = await AsyncStorage.getItem(StorageKey.ONBOARDING_STATUS);
-
-    if (onboardingStatus === VerificationStatus.NEEDS_VERIFICATION) {
-      setAccountNeedsVerification(true);
-      getUserStatus(parsedUserData);
-      setIsLoading(false);
-    } else {
-      const response = await User.onboardUser(
-        parsedUserData,
-        `${ Constants.manifest.extra.functionsUri }/refreshAccountLink`,
-        redirectUri
-      );
-
-      await AsyncStorage.setItem(StorageKey.ONBOARDING_STATUS, VerificationStatus.PENDING);
-
-      const result = await AuthSession.startAsync({
-        authUrl: `${ response }?redirect_uri=${ redirectUri }`
-      });
-
-      if (result.type === 'success') {
-        getUserStatus(parsedUserData);
-      } else {
-        await AsyncStorage.setItem(StorageKey.ONBOARDING_STATUS, VerificationStatus.CANCELLED);
+      if (User.storedUser && User.storedUser.verification_status === VerificationStatus.COMPLETED) {
+        navigation.navigate('Home');
+        return;
       }
+
+      setUser(parsedUserData);
+
+      const onboardingStatus = await User.getUser(User.storedUser.id).get();
+
+      if (onboardingStatus.data().verification_status === VerificationStatus.NEEDS_VERIFICATION) {
+        setAccountNeedsVerification(true);
+        getUserStatus(User.storedUser);
+        setIsLoading(false);
+      } else {
+        const response = await User.onboardUser(
+          User.storedUser.email,
+          `${ Constants.manifest.extra.functionsUri }/refreshAccountLink`,
+          redirectUri
+        );
+
+        await AsyncStorage.setItem(StorageKey.ONBOARDING_STATUS, VerificationStatus.PENDING);
+
+        const result = await AuthSession.startAsync({
+          authUrl: `${ response.data }?redirect_uri=${ redirectUri }`
+        });
+
+        if (result.type === 'success') {
+          getUserStatus(User.storedUser);
+        } else {
+          await AsyncStorage.setItem(StorageKey.ONBOARDING_STATUS, VerificationStatus.CANCELLED);
+        }
+      }
+    } catch (e) {
+      alert(e);
     }
   }
 
   const verifyStep = () => {
     return (
       <>
-        <View style={styles.header}>
-          <View style={styles.row}>
-            <Text style={styles.primaryText}>Last step</Text>
-            <Text style={styles.secondaryText}> verification</Text>
-          </View>
-        </View>
+        <Header main="Last step" sub="verification" />
         <View style={styles.verifyHost}>
           <View style={styles.verifyBox}>
             <Text style={styles.text}>
@@ -179,12 +179,7 @@ export function OnboardingScreen() {
   const onboardStep = () => {
     return (
       <>
-        <View style={styles.header}>
-          <View style={styles.row}>
-            <Text style={styles.primaryText}>Onboarding</Text>
-            <Text style={styles.secondaryText}> time</Text>
-          </View>
-        </View>
+        <Header main="Onboarding" sub="time" />
 
         <View style={styles.onboardHost}>
           <ActivityIndicator />
@@ -199,7 +194,7 @@ export function OnboardingScreen() {
   }, []);
 
   return (
-    <SafeAreaView style={styles.mainHost}>
+    <SafeAreaView style={styles.host}>
       {
         isLoading
           ? <ActivityIndicator />

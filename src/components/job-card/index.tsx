@@ -1,16 +1,15 @@
-import { IJob, JobStatus } from '@dlvrry/dlvrry-common';
+import { AccountType, IJob, IUser, JobStatus } from 'dlvrry-common';
+import React, { useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 
-import { AccountType } from '../../enums/AccountType';
 import { Button } from "../button";
 import { Job } from '../../services/job';
-import React from 'react';
 import { useNavigation } from "@react-navigation/native";
 import { variables } from "../../../Variables";
 
 const styles = StyleSheet.create({
   host: {
-    backgroundColor: variables.tertiaryColor,
+    backgroundColor: variables.secondaryColor,
     padding: 24,
     flex: 1,
     marginTop: 24,
@@ -27,34 +26,48 @@ const styles = StyleSheet.create({
 
 interface JobCardProps {
   job: IJob,
-  user: { uid: string },
+  user: IUser,
   account_type: string
 }
 
 export const JobCard = (props: JobCardProps) => {
   const navigation = useNavigation();
+  const [ isLoading, setIsLoading ] = useState(false);
 
   const acceptJob = async (id: string, userId: string) => {
-    await Job.acceptJob(id, userId);
+    try {
+      setIsLoading(true);
 
-    navigation.navigate('Rider', {
-      screen: 'Rider',
-      params: {
-        customerAddress: {
-          latitude: props.job.customer_location.latitude,
-          longitude: props.job.customer_location.longitude
-        },
-        pickupAddress: {
-          latitude: props.job.pickup_location.latitude,
-          longitude: props.job.pickup_location.longitude
-        },
-        job: props.job
-      }
-    });
+      await Job.acceptJob(id, userId);
+
+      navigation.navigate('Rider', {
+        screen: 'Rider',
+        params: {
+          customerAddress: {
+            latitude: props.job.customer_location.latitude,
+            longitude: props.job.customer_location.longitude
+          },
+          pickupAddress: {
+            latitude: props.job.pickup_location.latitude,
+            longitude: props.job.pickup_location.longitude
+          },
+          job: props.job
+        }
+      });
+
+      setIsLoading(false);
+    } catch (e) {
+      alert(e);
+      setIsLoading(false);
+    }
   }
 
   const cancelJob = async (id: string) => {
-    await Job.cancelJob(id);
+    try {
+      await Job.cancelJob(id);
+    } catch (e) {
+      alert(e);
+    }
   }
 
   const handleJobStatus = (status: string) => {
@@ -63,13 +76,18 @@ export const JobCard = (props: JobCardProps) => {
     } else if (status === JobStatus.IN_PROGRESS) {
       return <Text style={{ color: variables.success }}>In progress</Text>;
     } else if (status === JobStatus.CANCELLED) {
-      return <Text style={{ color: variables.warning }}>Cancelled</Text>;
+      return (
+        <>
+          <Text style={{ color: variables.warning, marginBottom: 12 }}>Cancelled by rider. Job is still awaiting a rider to accept</Text>
+          <Button type="primary" title={'Cancel job'} onPress={() => cancelJob(props.job.id)} />
+        </>
+      )
     }
     else {
       return (
         <>
-          <Text style={{ color: variables.dark, marginBottom: 12 }}> Awaiting acceptance</Text>
-          <Button type="primaryNoBorder" title={'Cancel job'} onPress={() => cancelJob(props.job.id)} />
+          <Text style={{ color: variables.success, marginBottom: 12 }}> Awaiting acceptance</Text>
+          <Button type="primary" title={'Cancel job'} onPress={() => cancelJob(props.job.id)} />
         </>
       );
     }
@@ -78,16 +96,16 @@ export const JobCard = (props: JobCardProps) => {
   return (
     <View style={styles.host} >
       <View style={styles.column}>
-        <Text style={{ fontWeight: '700', fontSize: 22, color: variables.dark }}>{props.job.owner_name}</Text>
-        <Text style={{ fontWeight: '300', marginTop: 8, fontSize: 18, color: variables.dark }}>{props.job.customer_location.latitude} </Text>
-        <Text style={{ fontWeight: '300', marginTop: 8, fontSize: 18, color: variables.dark }}>£{(props.job.payout / 100).toFixed(2)} </Text>
-        <View style={{ width: 300 - 48, marginTop: 12 }}>
+        <Text style={{ fontWeight: '700', fontSize: 22, color: variables.light }}>{props.job.owner_name}</Text>
+        <Text style={{ fontWeight: '500', marginTop: 8, fontSize: 18, color: variables.light }}>Location name </Text>
+        <Text style={{ fontWeight: '500', marginTop: 8, fontSize: 18, color: variables.light }}>£{(props.job.payout / 100).toFixed(2)} </Text>
+        <View style={{ width: 300 - 24, marginTop: 12 }}>
           {
             props.account_type === AccountType.RIDER
               ? <Button
-                type="primaryNoBorder"
+                type="primary"
                 title="Accept job"
-                onPress={() => acceptJob(props.job.id, props.user.uid)} />
+                onPress={() => acceptJob(props.job.id, props.user.id)} />
               : handleJobStatus(props.job.status)
           }
         </View>

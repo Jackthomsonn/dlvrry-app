@@ -6,7 +6,7 @@ import { CreateJobScreen } from '../pages/create-job/CreateJob';
 import { HomeScreen } from '../pages/home/Home';
 import { OnboardingScreen } from '../pages/onboarding/Onboarding';
 import { StorageKey } from '../enums/Storage.enum';
-import { VerificationStatus } from '@dlvrry/dlvrry-common';
+import { VerificationStatus } from 'dlvrry-common';
 import { createStackNavigator } from '@react-navigation/stack';
 
 const HomeStack = createStackNavigator();
@@ -26,10 +26,10 @@ export function HomeStackScreen() {
   const accountIsVerified = () => {
     return (
       <HomeStack.Navigator>
-        <HomeStack.Screen name="Home" component={HomeScreen} options={{ headerShown: false }} />
-        <HomeStack.Screen name="Onboarding" component={OnboardingScreen} options={{ headerShown: false }} />
-        <HomeStack.Screen name="AddCard" component={AddCardScreen} options={{ headerShown: false }} />
-        <HomeStack.Screen name="CreateJob" component={CreateJobScreen} options={{ headerShown: false }} />
+        <HomeStack.Screen name="Home" component={HomeScreen} options={{ headerShown: false, gestureEnabled: false }} />
+        <HomeStack.Screen name="Onboarding" component={OnboardingScreen} options={{ headerShown: false, gestureEnabled: false }} />
+        <HomeStack.Screen name="AddCard" component={AddCardScreen} options={{ headerShown: false, gestureEnabled: false }} />
+        <HomeStack.Screen name="CreateJob" component={CreateJobScreen} options={{ headerShown: false, gestureEnabled: false }} />
       </HomeStack.Navigator>
     )
   }
@@ -37,10 +37,10 @@ export function HomeStackScreen() {
   const accountIsNotVerified = () => {
     return (
       <HomeStack.Navigator>
-        <HomeStack.Screen name="Onboarding" component={OnboardingScreen} options={{ headerShown: false }} />
-        <HomeStack.Screen name="Home" component={HomeScreen} options={{ headerShown: false }} />
-        <HomeStack.Screen name="AddCard" component={AddCardScreen} options={{ headerShown: false }} />
-        <HomeStack.Screen name="CreateJob" component={CreateJobScreen} options={{ headerShown: false }} />
+        <HomeStack.Screen name="Onboarding" component={OnboardingScreen} options={{ headerShown: false, gestureEnabled: false }} />
+        <HomeStack.Screen name="Home" component={HomeScreen} options={{ headerShown: false, gestureEnabled: false }} />
+        <HomeStack.Screen name="AddCard" component={AddCardScreen} options={{ headerShown: false, gestureEnabled: false }} />
+        <HomeStack.Screen name="CreateJob" component={CreateJobScreen} options={{ headerShown: false, gestureEnabled: false }} />
       </HomeStack.Navigator>
     )
   }

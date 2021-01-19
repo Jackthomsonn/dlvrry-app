@@ -25,17 +25,22 @@ export const Map = (props: MapProps) => {
   const [ isReady, setIsReady ] = useState(false);
 
   useEffect(() => {
-    (async () => {
-      let { status } = await Location.requestPermissionsAsync();
-      if (status !== 'granted') { }
-
-      let location = await Location.getCurrentPositionAsync();
-
-      setUsersCurrentLocation(location);
-
-      setIsReady(true);
-    })();
+    setup();
   }, []);
+
+  const setup = async () => {
+    let { status } = await Location.requestPermissionsAsync();
+
+    if (status !== 'granted') {
+      alert('Location not granted');
+    }
+
+    let location = await Location.getCurrentPositionAsync();
+
+    setUsersCurrentLocation(location);
+
+    setIsReady(true);
+  }
 
   return (
     isReady

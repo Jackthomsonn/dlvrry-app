@@ -9,9 +9,9 @@ const AuthStack = createStackNavigator();
 export function AuthStackScreen() {
   return (
     <AuthStack.Navigator>
-      <AuthStack.Screen name="Welcome" component={WelcomeScreen} options={{ headerShown: false }} />
-      <AuthStack.Screen name="SignUp" component={SignUpScreen} options={{ headerShown: false }} />
-      <AuthStack.Screen name="Login" component={LoginScreen} options={{ headerShown: false }} />
+      <AuthStack.Screen name="Welcome" component={WelcomeScreen} options={{ headerShown: false, gestureEnabled: false }} />
+      <AuthStack.Screen name="SignUp" component={SignUpScreen} options={{ headerShown: false, gestureEnabled: false }} />
+      <AuthStack.Screen name="Login" component={LoginScreen} options={{ headerShown: false, gestureEnabled: false }} />
     </AuthStack.Navigator>
   );
 }

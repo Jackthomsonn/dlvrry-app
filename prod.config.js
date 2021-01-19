@@ -1,5 +1,5 @@
 module.exports = {
-  functionsUri: 'NOT_CONFIGURED',
+  functionsUri: 'https://us-central1-dlvrry-33018.cloudfunctions.net',
   useEmulator: false,
   apiKey: "AIzaSyBcQkaIwOQN0mbW8aUhjXIVz2q22cywbbU",
   authDomain: "dlvrry-33018.firebaseapp.com",

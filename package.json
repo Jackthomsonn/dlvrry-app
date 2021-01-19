@@ -10,7 +10,6 @@
     "deploy:android": "npm run env:prod && expo build android --release-channel staging"
   },
   "dependencies": {
-    "@dlvrry/dlvrry-common": "git+https://github.com/Jackthomsonn/dlvrry-common.git",
     "@react-native-community/async-storage": "^1.12.1",
     "@react-native-community/masked-view": "0.1.10",
     "@react-navigation/bottom-tabs": "^5.2.1",
@@ -21,6 +20,7 @@
     "axios": "^0.21.0",
     "base-64": "^0.1.0",
     "calculate-percentages": "^1.0.0",
+    "dlvrry-common": "0.0.1",
     "expo": "^39.0.0",
     "expo-app-auth": "~9.2.0",
     "expo-auth-session": "~2.0.0",
@@ -32,11 +32,13 @@
     "percent-value": "^1.0.9",
     "react": "16.13.1",
     "react-dom": "16.13.1",
+    "react-firebase-hooks": "^2.2.0",
     "react-hook-form": "^6.13.0",
     "react-native": "https://github.com/expo/react-native/archive/sdk-39.0.3.tar.gz",
     "react-native-actions-sheet": "^0.4.2",
     "react-native-dropdown-picker": "^3.7.6",
     "react-native-gesture-handler": "~1.7.0",
+    "react-native-google-places-autocomplete": "^2.1.2",
     "react-native-maps": "0.27.1",
     "react-native-maps-directions": "^1.8.0",
     "react-native-reanimated": "~1.13.0",
@@ -46,7 +48,9 @@
     "react-native-webview": "^11.0.2",
     "redux": "^4.0.5",
     "rxjs": "^6.6.3",
-    "stripe": "^8.128.0"
+    "stripe": "^8.131.1",
+    "stripe-client": "^1.1.5",
+    "uuid": "^8.3.2"
   },
   "devDependencies": {
     "@babel/core": "^7.0.0",

@@ -1,7 +1,7 @@
 import { Text, View } from "react-native"
 
 import { Button } from "../button"
-import { IJob } from "@dlvrry/dlvrry-common";
+import { IJob } from "dlvrry-common";
 import { Job } from "../../services/job"
 import React from "react"
 import { useNavigation } from "@react-navigation/native"
@@ -15,13 +15,21 @@ export const Info = (props: InfoProps) => {
   const navigation = useNavigation();
 
   const cancelJob = async () => {
-    await Job.cancelJob(props.job.id);
-    navigation.goBack();
+    try {
+      await Job.cancelJob(props.job.id);
+      navigation.goBack();
+    } catch (e) {
+      alert(e);
+    }
   }
 
   const completeJob = async () => {
-    await Job.completeJob(props.job);
-    navigation.goBack();
+    try {
+      await Job.completeJob(props.job);
+      navigation.goBack();
+    } catch (e) {
+      alert(e);
+    }
   }
 
   return (

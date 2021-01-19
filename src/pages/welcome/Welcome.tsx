@@ -59,7 +59,7 @@ export function WelcomeScreen() {
         <Image source={require('../../../assets/icon.png')} style={styles.logo} />
       </View>
       <View style={styles.content}>
-        <Text style={styles.contentText}>The on-demand delivery service for urban and rural areas</Text>
+        <Text style={styles.contentText}>The on-demand delivery service that make sure you recieve your items on the same day you ordered them!</Text>
       </View>
       <View style={styles.buttonContainer}>
         <View style={styles.buttonRider}>
