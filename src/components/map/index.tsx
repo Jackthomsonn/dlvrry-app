@@ -35,7 +35,7 @@ export const Map = (props: MapProps) => {
       alert('Location not granted');
     }
 
-    let location = await Location.getCurrentPositionAsync();
+    let location = await Location.getCurrentPositionAsync({ accuracy: Location.LocationAccuracy.BestForNavigation });
 
     setUsersCurrentLocation(location);
 
@@ -62,16 +62,16 @@ export const Map = (props: MapProps) => {
           pitch: 50,
           heading: 0
         }}
-        onUserLocationChange={(e) => {
-          map.animateCamera({
-            center: {
-              latitude: e.nativeEvent.coordinate.latitude,
-              longitude: e.nativeEvent.coordinate.longitude
-            }
-          })
-        }}
+        // onUserLocationChange={(e) => {
+        //   map.animateCamera({
+        //     center: {
+        //       latitude: e.nativeEvent.coordinate.latitude,
+        //       longitude: e.nativeEvent.coordinate.longitude
+        //     }
+        //   })
+        // }}
         showsUserLocation={true}
-        followsUserLocation={true} >
+        followsUserLocation={true}>
 
         <MapViewDirections
           origin={{

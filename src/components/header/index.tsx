@@ -4,9 +4,9 @@ import { ScrollView, TouchableOpacity } from "react-native-gesture-handler";
 
 import { AccountType } from 'dlvrry-common';
 import ActionSheet from 'react-native-actions-sheet';
-import AsyncStorage from '@react-native-community/async-storage';
 import { Button } from '../button';
 import { Ionicons } from '@expo/vector-icons';
+import { Loader } from '../loader';
 import { User } from '../../services/user';
 import firebase from 'firebase';
 import { useNavigation } from '@react-navigation/native';
@@ -20,6 +20,9 @@ interface HeaderProps {
 
 export const Header = (props: HeaderProps) => {
   const [ cards, setCards ] = useState(undefined);
+  const [ isLoading, setIsLoading ] = useState(false);
+  const [ isLoggingOut, setIsLoggingOut ] = useState(false);
+  const [ isGettingCards, setIsGettingCards ] = useState(false);
   const actionSheetRef: any = createRef();
   const navigation = useNavigation();
 
@@ -27,9 +30,9 @@ export const Header = (props: HeaderProps) => {
     return (
       <>
         <Text style={{ fontSize: 24, marginTop: 24 }}>Dashboard</Text>
-        <TouchableOpacity style={{ marginTop: 8 }} onPress={() => goToDashboard()}>
-          <Text style={{ marginBottom: 8, fontSize: 18 }}>Go to my dashboard</Text>
-        </TouchableOpacity>
+        <View style={{ marginTop: 8 }}>
+          <Button type="primary" title="Go to my dashboard" onPress={() => { goToDashboard() }} loading={isLoading} />
+        </View>
       </>
     )
   }
@@ -39,14 +42,25 @@ export const Header = (props: HeaderProps) => {
       <View>
         <Text style={{ fontSize: 24, marginTop: 24 }}>Cards</Text>
         {
-          cards?.length === 0
-            ? <>
-              <Text style={{ marginTop: 8 }}>You have no available cards</Text>
-              <View style={{ marginTop: 8 }}>
-                <Button type="primary" title="Add card" onPress={() => { setupCard() }} />
-              </View>
-            </>
-            : <Button type="primary" title="Add card" onPress={() => { setupCard() }} />
+          isGettingCards
+            ? <Loader />
+            : cards?.length === 0
+              ? <>
+                <Text style={{ marginTop: 8 }}>You have no available cards</Text>
+                <View style={{ marginTop: 8 }}>
+                  <Button type="primary" title="Add card" onPress={() => { setupCard() }} />
+                </View>
+              </>
+              : <>
+                {
+                  cards?.length
+                    ? <Text style={{ marginTop: 8 }}>You have {cards.length} card available ending in {cards[ 0 ]}</Text>
+                    : <Text>No cards available</Text>
+                }
+                <View style={{ marginTop: 8 }}>
+                  <Button type="primary" title="Remove card" onPress={() => { setupCard(); }} />
+                </View>
+              </>
         }
       </View>
     )
@@ -57,33 +71,40 @@ export const Header = (props: HeaderProps) => {
       <>
         <Text style={{ fontSize: 24 }}>Account settings</Text>
         <TouchableOpacity hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }} style={{ marginTop: 8 }} onPress={() => logout()}>
-          <Text style={{ marginBottom: 8, fontSize: 18 }}>Log out</Text>
+          {isLoggingOut ? <Loader /> : <Text style={{ marginBottom: 8, fontSize: 18 }}>Log out</Text>}
         </TouchableOpacity>
       </>
     )
   }
 
   const goToDashboard = async () => {
+    setIsLoading(true);
+
     const loginLink = await User.getLoginLink(User.storedUser.id);
 
+    setIsLoading(false);
     Linking.openURL(loginLink.data.url);
   }
 
   const logout = async () => {
-    await firebase.auth().signOut();
-    await AsyncStorage.clear();
-    User.storedUser = undefined;
-    User.authenticated.next(false);
+    setIsLoggingOut(true);
+    firebase.auth().signOut();
   }
 
   const getCards = async () => {
+    setIsGettingCards(true);
+
     if (!User.storedUser || !User.storedUser.customer_id) {
+      setIsGettingCards(false);
+
       return;
     }
 
     const response = await User.getCards(User.storedUser.customer_id);
 
     setCards(response);
+
+    setIsGettingCards(false);
   }
 
   const setupCard = async () => {
@@ -96,21 +117,15 @@ export const Header = (props: HeaderProps) => {
     navigation.navigate('AddCard', { customer_id: User.storedUser.customer_id });
   }
 
-  const setup = async () => {
-    getCards();
-  }
-
   const goBack = () => {
     navigation.goBack();
   }
 
   const showActionSheet = () => {
+    getCards();
+
     actionSheetRef.current?.show();
   }
-
-  useEffect(() => {
-    setup();
-  }, []);
 
   return (
     <>

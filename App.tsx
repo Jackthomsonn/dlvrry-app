@@ -24,14 +24,11 @@ const Tab = createBottomTabNavigator();
 
 // AsyncStorage.clear();
 // firebase.auth().signOut();
-// User.storedUser = undefined
+// User.storedUser = undefined;
 
 export default function App() {
   const [ isLoggedIn, setLoggedInState ] = useState(false);
   const [ isLoading, setIsLoadingState ] = useState(true);
-  const [ activeUser, setActiveUser ] = useState(undefined);
-
-  User.requestAndSetStoredUser();
 
   if (firebase.apps.length === 0) {
     const fi = firebase.initializeApp({
@@ -55,34 +52,30 @@ export default function App() {
   }
 
   firebase.auth().onAuthStateChanged(async user => {
-    setActiveUser(user);
+    await User.requestAndSetStoredUser();
 
-    if (user && User.storedUser && User.storedUser.id) {
-      setLoggedInState(user !== null);
+    setTimeout(async () => {
+      if (user) {
+        setIsLoadingState(false);
+        setLoggedInState(true);
+      }
+    }, 2000);
+
+    if (!user) {
       setIsLoadingState(false);
-    } else {
-      setIsLoadingState(false);
+      setLoggedInState(false);
+      User.tearDownUserData();
     }
   });
 
-  User.authenticated.subscribe(async (isAuthenticated: boolean) => {
-    if (!isAuthenticated) {
-      setIsLoadingState(false);
-      setLoggedInState(false);
-
-      return;
-    }
-
-    if (!User.storedUser) {
-      try {
-        await User.setupStoredUser(activeUser);
-        setIsLoadingState(false);
+  User.authenticated.subscribe(async (user: firebase.User) => {
+    if (user) {
+      setIsLoadingState(true);
+      await User.setupStoredUser(user);
+      setTimeout(() => {
         setLoggedInState(true);
-      } catch (e) {
-        return e;
-      }
-    } else {
-      setLoggedInState(true);
+        setIsLoadingState(false);
+      }, 2000);
     }
   });
 

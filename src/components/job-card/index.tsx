@@ -34,11 +34,11 @@ export const JobCard = (props: JobCardProps) => {
   const navigation = useNavigation();
   const [ isLoading, setIsLoading ] = useState(false);
 
-  const acceptJob = async (id: string, userId: string) => {
+  const acceptJob = async (id: string, rider_id: string) => {
     try {
       setIsLoading(true);
 
-      await Job.acceptJob(id, userId);
+      await Job.acceptJob(id, rider_id);
 
       navigation.navigate('Rider', {
         screen: 'Rider',
@@ -64,9 +64,14 @@ export const JobCard = (props: JobCardProps) => {
 
   const cancelJob = async (id: string) => {
     try {
+      setIsLoading(true);
+
       await Job.cancelJob(id);
+
+      setIsLoading(false);
     } catch (e) {
       alert(e);
+      setIsLoading(false);
     }
   }
 
@@ -79,7 +84,7 @@ export const JobCard = (props: JobCardProps) => {
       return (
         <>
           <Text style={{ color: variables.warning, marginBottom: 12 }}>Cancelled by rider. Job is still awaiting a rider to accept</Text>
-          <Button type="primary" title={'Cancel job'} onPress={() => cancelJob(props.job.id)} />
+          <Button type="primary" title={'Cancel job'} onPress={() => cancelJob(props.job.id)} loading={isLoading} />
         </>
       )
     }
@@ -87,7 +92,7 @@ export const JobCard = (props: JobCardProps) => {
       return (
         <>
           <Text style={{ color: variables.success, marginBottom: 12 }}> Awaiting acceptance</Text>
-          <Button type="primary" title={'Cancel job'} onPress={() => cancelJob(props.job.id)} />
+          <Button type="primary" title={'Cancel job'} onPress={() => cancelJob(props.job.id)} loading={isLoading} />
         </>
       );
     }
@@ -105,7 +110,8 @@ export const JobCard = (props: JobCardProps) => {
               ? <Button
                 type="primary"
                 title="Accept job"
-                onPress={() => acceptJob(props.job.id, props.user.id)} />
+                onPress={() => acceptJob(props.job.id, props.user.id)}
+                loading={isLoading} />
               : handleJobStatus(props.job.status)
           }
         </View>

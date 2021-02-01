@@ -20,7 +20,7 @@
     "axios": "^0.21.0",
     "base-64": "^0.1.0",
     "calculate-percentages": "^1.0.0",
-    "dlvrry-common": "0.0.1",
+    "dlvrry-common": "0.0.5",
     "expo": "^39.0.0",
     "expo-app-auth": "~9.2.0",
     "expo-auth-session": "~2.0.0",

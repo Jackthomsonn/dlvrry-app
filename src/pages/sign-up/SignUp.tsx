@@ -78,7 +78,7 @@ export function SignUpScreen() {
         name: getValues('name')
       });
 
-      User.authenticated.next(result.user !== null);
+      User.authenticated.next(result.user);
 
       setIsLoading(false);
     } catch (error) {

@@ -7,7 +7,10 @@ import firebase from 'firebase';
 
 export class Job {
   static getJobs() {
-    return firebase.firestore().collection('jobs').where('status', 'in', [ JobStatus.PENDING, JobStatus.CANCELLED ])
+    return firebase
+      .firestore()
+      .collection('jobs')
+      .where('status', 'in', [ JobStatus.PENDING, JobStatus.CANCELLED ])
   }
 
   static getJobsForBusiness(id: string) {
@@ -19,9 +22,12 @@ export class Job {
   }
 
   static async acceptJob(id: string, rider_id: string) {
-    return firebase.firestore().collection('jobs').doc(id).update({
-      status: JobStatus.IN_PROGRESS,
-      rider_id: rider_id
+    const token = await firebase.auth().currentUser.getIdToken();
+
+    return await Axios.post<string, AxiosResponse<string>>(`${ Constants.manifest.extra.functionsUri }/acceptJob`, { id, rider_id }, {
+      headers: {
+        'Authorization': token
+      }
     });
   }
 
@@ -45,10 +51,22 @@ export class Job {
   }
 
   static async completeJob(job: IJob) {
-    return await Axios.post<string, AxiosResponse<string>>(`${ Constants.manifest.extra.functionsUri }/completeJob`, { job });
+    const token = await firebase.auth().currentUser.getIdToken();
+
+    return await Axios.post<string, AxiosResponse<string>>(`${ Constants.manifest.extra.functionsUri }/completeJob`, { job }, {
+      headers: {
+        'Authorization': token
+      }
+    });
   }
 
   static async createJob(job: IJob, owner_id: string) {
-    return await Axios.post<string, AxiosResponse<string>>(`${ Constants.manifest.extra.functionsUri }/createJob`, { job, owner_id });
+    const token = await firebase.auth().currentUser.getIdToken();
+
+    return await Axios.post<string, AxiosResponse<string>>(`${ Constants.manifest.extra.functionsUri }/createJob`, { job, owner_id }, {
+      headers: {
+        'Authorization': token
+      }
+    });
   }
 }

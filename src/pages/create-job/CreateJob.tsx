@@ -1,14 +1,14 @@
-import { KeyboardAvoidingView, ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
-import React, { createRef, useEffect, useRef, useState } from "react";
+import { KeyboardAvoidingView, StyleSheet, Text, View } from "react-native";
+import React, { useEffect, useRef, useState } from "react";
 
 import { Button } from "../../components/button";
-import { FlatList } from "react-native-gesture-handler";
 import { GooglePlacesAutocomplete } from 'react-native-google-places-autocomplete';
 import { Header } from "../../components/header";
 import { IJob } from "dlvrry-common";
 import { Input } from "../../components/input";
 import { Job } from "../../services/job";
 import { Loader } from "../../components/loader";
+import { LocationPicker } from "../../components/location-picker";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Session } from "../../services/session";
 import { User } from "../../services/user";
@@ -41,19 +41,15 @@ const styles = StyleSheet.create({
 });
 
 export const CreateJobScreen = () => {
-  const pickupLocationRef: any = useRef();
-  const customerPickupRef: any = useRef();
   const navigation = useNavigation();
 
-  const [ pickupLocationHeight, setPickupLocationHeight ] = useState(46);
-  const [ customerLocationHeight, setuCustomerLocationHeight ] = useState(46);
   const [ isLoading, setIsLoading ] = useState(false);
-  const [ sessionToken, setSessionToken ] = useState(undefined);
+  const [ isSubmitting, setIsSubmitting ] = useState(false);
   const [ riderPayout, setRiderPayout ] = useState(undefined);
   const { register, handleSubmit, setValue, errors, getValues } = useForm();
 
   const onSubmit = async (job: IJob) => {
-    setIsLoading(true);
+    setIsSubmitting(true);
 
     job.cost = job.payout * 100;
     job.payout = riderPayout * 100;
@@ -61,16 +57,17 @@ export const CreateJobScreen = () => {
     try {
       await Job.createJob(job, User.storedUser.id);
 
-      setIsLoading(false);
+      setIsSubmitting(false);
       navigation.goBack();
     } catch (e) {
-      setIsLoading(false);
+      setIsSubmitting(false);
       alert(e);
     }
   }
 
-  const setCostAndCaluclateRiderPayout = (value: any) => {
+  const setCostAndCalculateRiderPayout = (value: any) => {
     setValue('payout', value);
+
     const wholeAmount = Number(getValues('payout'));
     const dlvrryFee = percentage.of(12, wholeAmount) + 0.20;
 
@@ -86,10 +83,6 @@ export const CreateJobScreen = () => {
   const setup = async () => {
     setIsLoading(true);
 
-    const sessionToken = await Session.createToken();
-
-    setSessionToken(sessionToken.data);
-
     setIsLoading(false);
 
     register('payout', {
@@ -103,8 +96,18 @@ export const CreateJobScreen = () => {
       },
       valueAsNumber: true
     });
-    register('pickup_location');
-    register('customer_location');
+    register('pickup_location', {
+      required: {
+        message: 'You must provide a pickup location within 5 miles of your current location',
+        value: true
+      }
+    });
+    register('customer_location', {
+      required: {
+        message: 'You must provide a customer location within 5 miles of your current location',
+        value: true
+      }
+    });
     register('number_of_items', {
       required: {
         message: 'You must specify the amount of items included in this job',
@@ -120,16 +123,14 @@ export const CreateJobScreen = () => {
         value: 1
       }
     });
+  }
 
-    setInterval(() => {
-      if (customerPickupRef && customerPickupRef.current && customerPickupRef.current.isFocused()) {
-        setuCustomerLocationHeight(240)
-      }
+  const handleError = (modelName: string) => {
+    if (modelName && errors[ modelName ]) {
+      return (<Text style={styles.errorText}>{errors[ modelName ].message}</Text>);
+    }
 
-      if (pickupLocationRef && pickupLocationRef.current && pickupLocationRef.current.isFocused()) {
-        setPickupLocationHeight(240)
-      }
-    }, 1000);
+    return undefined;
   }
 
   return (
@@ -143,105 +144,29 @@ export const CreateJobScreen = () => {
             : <KeyboardAvoidingView behavior={'padding'} style={styles.keyboardView}>
               <Text style={{ marginBottom: 8 }}>Payout (£) {riderPayout > 0 ? <Text>- Rider will recieve £{riderPayout}</Text> : undefined}</Text>
 
-              <Input keyboardType={'numbers-and-punctuation'} onChange={value => setCostAndCaluclateRiderPayout(value)} />
+              <Input keyboardType={'numbers-and-punctuation'} onChange={value => setCostAndCalculateRiderPayout(value)} />
 
-              {
-                errors.payout
-                  ? <Text style={styles.errorText}>{errors.payout.message}</Text>
-                  : undefined
-              }
+              {handleError('payout')}
 
               <Text style={{ marginBottom: 8 }}>Pickup location</Text>
 
-              <View style={{
-                display: 'flex',
-                flex: 1,
-                minHeight: pickupLocationHeight,
-                height: 'auto',
-                borderWidth: 1,
-                borderRadius: 4,
-                marginBottom: 12,
-                borderColor: 'rgba(0, 0, 0, 0.1)'
-              }}>
-                <GooglePlacesAutocomplete
-                  ref={pickupLocationRef}
-                  debounce={200}
-                  placeholder={''}
-                  renderDescription={row => row.description}
-                  fetchDetails={true}
-                  enablePoweredByContainer={false}
-                  onPress={(_data, details) => {
-                    setPickupLocationHeight(46);
-                    setValue('pickup_location', {
-                      latitude: details.geometry.location.lat,
-                      longitude: details.geometry.location.lng
-                    })
-                  }}
-                  query={{
-                    key: 'AIzaSyBcQkaIwOQN0mbW8aUhjXIVz2q22cywbbU',
-                    sessiontoken: sessionToken,
-                    language: 'en',
-                  }}
-                />
-              </View>
+              <LocationPicker height={46} onChange={value => setValue('pickup_location', value)} />
 
-              {
-                errors.pickup_location
-                  ? <Text style={styles.errorText}>{errors.pickup_location.message}</Text>
-                  : undefined
-              }
+              {handleError('pickup_location')}
 
               <Text style={{ marginBottom: 8 }}>Customer location</Text>
 
-              <View style={{
-                display: 'flex',
-                flex: 1,
-                minHeight: customerLocationHeight,
-                height: 'auto',
-                borderWidth: 1,
-                borderRadius: 4,
-                marginBottom: 12,
-                borderColor: 'rgba(0, 0, 0, 0.1)'
-              }}>
-                <GooglePlacesAutocomplete
-                  ref={customerPickupRef}
-                  debounce={200}
-                  placeholder={''}
-                  renderDescription={row => row.description}
-                  fetchDetails={true}
-                  enablePoweredByContainer={false}
-                  onPress={(_data, details) => {
-                    setuCustomerLocationHeight(46);
-                    setValue('customer_location', {
-                      latitude: details.geometry.location.lat,
-                      longitude: details.geometry.location.lng
-                    })
-                  }}
-                  query={{
-                    key: 'AIzaSyBcQkaIwOQN0mbW8aUhjXIVz2q22cywbbU',
-                    sessiontoken: sessionToken,
-                    language: 'en',
-                  }}
-                />
-              </View>
+              <LocationPicker height={46} onChange={value => setValue('customer_location', value)} />
 
-              {
-                errors.customer_location
-                  ? <Text style={styles.errorText}>{errors.customer_location.message}</Text>
-                  : undefined
-              }
+              {handleError('customer_location')}
 
               <Text style={{ marginBottom: 8 }}>Number of items</Text>
 
               <Input keyboardType={'numbers-and-punctuation'} onChange={value => setValue('number_of_items', value)} />
 
-              {
-                errors.number_of_items
-                  ? <Text style={styles.errorText}>{errors.number_of_items.message}</Text>
-                  : undefined
-              }
+              {handleError('number_of_items')}
 
-              <Button type="primary" title="Create job" onPress={handleSubmit(onSubmit)} loading={isLoading}></Button>
+              <Button type="primary" title="Create job" onPress={handleSubmit(onSubmit)} loading={isSubmitting} ></Button>
             </KeyboardAvoidingView>
         }
       </>

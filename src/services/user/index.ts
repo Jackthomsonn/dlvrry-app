@@ -22,29 +22,51 @@ export class User {
     return await AsyncStorage.setItem(StorageKey.USER_DATA, JSON.stringify(newUserData));
   }
 
-  static async setupStoredUser(activeUser: firebase.User) {
-    if (!activeUser) {
+  static async setupStoredUser(user: firebase.User) {
+    if (!user) {
       return Promise.reject('No user');
     }
 
-    const newUser: any = await User.getUser(activeUser.uid).get();
+    const newUser: any = await User.getUser(user.uid).get();
 
     User.storedUser = newUser.data();
 
     return User.saveUser(newUser.data());
   }
 
+  static tearDownUserData() {
+    User.storedUser = undefined;
+  }
+
   static async getConnectedAccountDetails(id: string) {
-    return await Axios.post<string, AxiosResponse<Stripe.Account>>(`${ Constants.manifest.extra.functionsUri }/getConnectedAccountDetails`, { id });
+    const token = await firebase.auth().currentUser.getIdToken();
+
+    return await Axios.post<string, AxiosResponse<Stripe.Account>>(`${ Constants.manifest.extra.functionsUri }/getConnectedAccountDetails`, { id }, {
+      headers: {
+        'Authorization': token
+      }
+    });
   }
 
   static async getLoginLink(id: string) {
-    return await Axios.post<string, AxiosResponse<Stripe.LoginLink>>(`${ Constants.manifest.extra.functionsUri }/getLoginLink`, { id });
+    const token = await firebase.auth().currentUser.getIdToken();
+
+    return await Axios.post<string, AxiosResponse<Stripe.LoginLink>>(`${ Constants.manifest.extra.functionsUri }/getLoginLink`, { id }, {
+      headers: {
+        'Authorization': token
+      }
+    });
   }
 
   static async onboardUser(email: string, refreshUrl: string, returnUrl: string) {
+    const token = await firebase.auth().currentUser.getIdToken();
+
     if (User.storedUser && User.storedUser.id) {
-      return await Axios.post<string, AxiosResponse<string>>(`${ Constants.manifest.extra.functionsUri }/onboardUser`, { email, id: User.storedUser.id, refreshUrl, returnUrl });
+      return await Axios.post<string, AxiosResponse<string>>(`${ Constants.manifest.extra.functionsUri }/onboardUser`, { email, id: User.storedUser.id, refreshUrl, returnUrl }, {
+        headers: {
+          'Authorization': token
+        }
+      });
     }
   }
 
@@ -67,9 +89,13 @@ export class User {
     return firebase.firestore().collection('users').doc(id);
   }
 
-  static async getCards(id: string) {
-    const response = await Axios.post<any, AxiosResponse<any>>(`${ Constants.manifest.extra.functionsUri }/getPaymentCards`, {
-      customer_id: id
+  static async getCards(customer_id: string) {
+    const token = await firebase.auth().currentUser.getIdToken();
+
+    const response = await Axios.post<any, AxiosResponse<any>>(`${ Constants.manifest.extra.functionsUri }/getPaymentCards`, { customer_id, id: firebase.auth().currentUser.uid }, {
+      headers: {
+        'Authorization': token
+      }
     });
 
     const collection = [];

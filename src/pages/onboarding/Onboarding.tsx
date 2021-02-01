@@ -61,7 +61,6 @@ export function OnboardingScreen() {
 
   const [ accountNeedsVerification, setAccountNeedsVerification ] = useState(false);
   const [ loginLink, setLoginLink ] = useState(undefined);
-  const [ user, setUser ] = useState(undefined);
   const [ isLoading, setIsLoading ] = useState(false);
 
   const getUserStatus = async (user: IUser) => {
@@ -97,13 +96,11 @@ export function OnboardingScreen() {
 
   const refresh = () => {
     setIsLoading(true);
-    getUserStatus(user);
+    getUserStatus(User.storedUser);
   }
 
   const setup = async () => {
     try {
-      const userData = await AsyncStorage.getItem(StorageKey.USER_DATA);
-      const parsedUserData: IUserData = JSON.parse(userData);
       const redirectUri = AuthSession.makeRedirectUri({ useProxy: true });
 
       if (User.storedUser && User.storedUser.verification_status === VerificationStatus.COMPLETED) {
@@ -111,7 +108,9 @@ export function OnboardingScreen() {
         return;
       }
 
-      setUser(parsedUserData);
+      if (!User.storedUser || !User.storedUser.id) {
+        return;
+      }
 
       const onboardingStatus = await User.getUser(User.storedUser.id).get();
 

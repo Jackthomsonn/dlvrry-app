@@ -59,9 +59,7 @@ export function LoginScreen() {
         getValues('password')
       );
 
-      User.authenticated.next(result.user !== null);
-
-      setIsLoading(false);
+      User.authenticated.next(result.user);
     } catch (error) {
       alert(error.message);
       setIsLoading(false);
