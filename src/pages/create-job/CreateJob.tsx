@@ -1,18 +1,17 @@
-import { KeyboardAvoidingView, StyleSheet, Text, View } from "react-native";
-import React, { useEffect, useRef, useState } from "react";
+import { IJob, IUser } from "dlvrry-common";
+import { KeyboardAvoidingView, StyleSheet, Text } from "react-native";
+import React, { useEffect, useState } from "react";
 
 import { Button } from "../../components/button";
-import { GooglePlacesAutocomplete } from 'react-native-google-places-autocomplete';
+import { CardService } from "../../services/card";
 import { Header } from "../../components/header";
-import { IJob } from "dlvrry-common";
 import { Input } from "../../components/input";
 import { Job } from "../../services/job";
 import { Loader } from "../../components/loader";
 import { LocationPicker } from "../../components/location-picker";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { Session } from "../../services/session";
 import { User } from "../../services/user";
-import percentage from 'calculate-percentages';
+import { useDocumentData } from "react-firebase-hooks/firestore";
 import { useForm } from "react-hook-form";
 import { useNavigation } from "@react-navigation/native";
 import { variables } from "../../../Variables";
@@ -43,37 +42,43 @@ const styles = StyleSheet.create({
 export const CreateJobScreen = () => {
   const navigation = useNavigation();
 
-  const [ isLoading, setIsLoading ] = useState(false);
   const [ isSubmitting, setIsSubmitting ] = useState(false);
-  const [ riderPayout, setRiderPayout ] = useState(undefined);
-  const { register, handleSubmit, setValue, errors, getValues } = useForm();
+  const [ user, userLoading, userError ] = useDocumentData<IUser>(User.getUser(User.storedUserId));
+
+  const { register, handleSubmit, setValue, errors } = useForm();
 
   const onSubmit = async (job: IJob) => {
     setIsSubmitting(true);
 
-    job.cost = job.payout * 100;
-    job.payout = riderPayout * 100;
-
     try {
-      await Job.createJob(job, User.storedUser.id);
+      const response = await Job.createJob(job, user?.id);
 
-      setIsSubmitting(false);
-      navigation.goBack();
+      if (response.data.completed) {
+        setIsSubmitting(false);
+        navigation.goBack();
+      } else {
+        setIsSubmitting(false);
+
+        const authCompleted = CardService.authenticationCompleted.subscribe((result) => {
+          if (!result.completed) {
+            alert(result.message);
+          } else {
+            response.data
+          }
+
+          navigation.goBack();
+          authCompleted.unsubscribe();
+        });
+
+        navigation.navigate('AuthenticatePayment', {
+          client_secret: response.data.client_secret,
+          payment_method_id: response.data.payment_method_id
+        });
+      }
     } catch (e) {
       setIsSubmitting(false);
       alert(e);
     }
-  }
-
-  const setCostAndCalculateRiderPayout = (value: any) => {
-    setValue('payout', value);
-
-    const wholeAmount = Number(getValues('payout'));
-    const dlvrryFee = percentage.of(12, wholeAmount) + 0.20;
-
-    const amountAfterPayoutFee = wholeAmount - dlvrryFee;
-
-    setRiderPayout((amountAfterPayoutFee).toFixed(2));
   }
 
   useEffect(() => {
@@ -81,13 +86,9 @@ export const CreateJobScreen = () => {
   }, [ register ]);
 
   const setup = async () => {
-    setIsLoading(true);
-
-    setIsLoading(false);
-
-    register('payout', {
+    register('cost', {
       required: {
-        message: 'You must specify how much the rider will recieve',
+        message: 'You must specify the cost of this job',
         value: true
       },
       min: {
@@ -139,35 +140,33 @@ export const CreateJobScreen = () => {
         <Header main="Create" sub="job" showBackButton={true} />
 
         {
-          isLoading
-            ? <Loader />
-            : <KeyboardAvoidingView behavior={'padding'} style={styles.keyboardView}>
-              <Text style={{ marginBottom: 8 }}>Payout (£) {riderPayout > 0 ? <Text>- Rider will recieve £{riderPayout}</Text> : undefined}</Text>
+          <KeyboardAvoidingView behavior={'padding'} style={styles.keyboardView}>
+            <Text style={{ marginBottom: 8 }}>Cost (£)</Text>
 
-              <Input keyboardType={'numbers-and-punctuation'} onChange={value => setCostAndCalculateRiderPayout(value)} />
+            <Input keyboardType={'numbers-and-punctuation'} onChange={value => setValue('cost', value * 100)} />
 
-              {handleError('payout')}
+            {handleError('cost')}
 
-              <Text style={{ marginBottom: 8 }}>Pickup location</Text>
+            <Text style={{ marginBottom: 8 }}>Pickup location</Text>
 
-              <LocationPicker height={46} onChange={value => setValue('pickup_location', value)} />
+            <LocationPicker height={46} onChange={value => setValue('pickup_location', value)} />
 
-              {handleError('pickup_location')}
+            {handleError('pickup_location')}
 
-              <Text style={{ marginBottom: 8 }}>Customer location</Text>
+            <Text style={{ marginBottom: 8 }}>Customer location</Text>
 
-              <LocationPicker height={46} onChange={value => setValue('customer_location', value)} />
+            <LocationPicker height={46} onChange={value => setValue('customer_location', value)} />
 
-              {handleError('customer_location')}
+            {handleError('customer_location')}
 
-              <Text style={{ marginBottom: 8 }}>Number of items</Text>
+            <Text style={{ marginBottom: 8 }}>Number of items</Text>
 
-              <Input keyboardType={'numbers-and-punctuation'} onChange={value => setValue('number_of_items', value)} />
+            <Input keyboardType={'numbers-and-punctuation'} onChange={value => setValue('number_of_items', value)} />
 
-              {handleError('number_of_items')}
+            {handleError('number_of_items')}
 
-              <Button type="primary" title="Create job" onPress={handleSubmit(onSubmit)} loading={isSubmitting} ></Button>
-            </KeyboardAvoidingView>
+            <Button type="primary" title="Create job" onPress={handleSubmit(onSubmit)} loading={isSubmitting} ></Button>
+          </KeyboardAvoidingView>
         }
       </>
     </SafeAreaView >

@@ -1,27 +1,20 @@
-import React, { useEffect, useState } from 'react';
+import { IUser, VerificationStatus } from 'dlvrry-common';
+import React, { useEffect } from 'react';
 
+import { ActivityIndicator } from 'react-native';
 import { AddCardScreen } from '../pages/add-card/AddCard';
-import AsyncStorage from '@react-native-community/async-storage';
+import { AuthenticatePaymentScreen } from '../pages/authenticate-payment/AuthenticatePayment';
 import { CreateJobScreen } from '../pages/create-job/CreateJob';
 import { HomeScreen } from '../pages/home/Home';
 import { OnboardingScreen } from '../pages/onboarding/Onboarding';
-import { StorageKey } from '../enums/Storage.enum';
-import { VerificationStatus } from 'dlvrry-common';
+import { User } from '../services/user';
 import { createStackNavigator } from '@react-navigation/stack';
+import { useDocumentData } from 'react-firebase-hooks/firestore';
 
 const HomeStack = createStackNavigator();
 
 export function HomeStackScreen() {
-  const [ onboardingStatus, setOnboardingStatus ] = useState(undefined);
-
-  const setup = async () => {
-    const status = await AsyncStorage.getItem(StorageKey.ONBOARDING_STATUS);
-    setOnboardingStatus(status);
-  }
-
-  useEffect(() => {
-    setup();
-  });
+  const [ user, userLoading, userError ] = useDocumentData<IUser>(User.getUser(User.storedUserId));
 
   const accountIsVerified = () => {
     return (
@@ -29,6 +22,7 @@ export function HomeStackScreen() {
         <HomeStack.Screen name="Home" component={HomeScreen} options={{ headerShown: false, gestureEnabled: false }} />
         <HomeStack.Screen name="Onboarding" component={OnboardingScreen} options={{ headerShown: false, gestureEnabled: false }} />
         <HomeStack.Screen name="AddCard" component={AddCardScreen} options={{ headerShown: false, gestureEnabled: false }} />
+        <HomeStack.Screen name="AuthenticatePayment" component={AuthenticatePaymentScreen} options={{ headerShown: false, gestureEnabled: false }} />
         <HomeStack.Screen name="CreateJob" component={CreateJobScreen} options={{ headerShown: false, gestureEnabled: false }} />
       </HomeStack.Navigator>
     )
@@ -45,11 +39,13 @@ export function HomeStackScreen() {
     )
   }
 
-  useEffect(() => { })
+  console.log(user);
 
   return (
-    onboardingStatus === VerificationStatus.COMPLETED
-      ? accountIsVerified()
-      : accountIsNotVerified()
+    userLoading || !user
+      ? <ActivityIndicator />
+      : user.verification_status === VerificationStatus.COMPLETED
+        ? accountIsVerified()
+        : accountIsNotVerified()
   );
 }

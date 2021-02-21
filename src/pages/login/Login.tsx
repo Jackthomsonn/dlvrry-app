@@ -5,7 +5,6 @@ import { Button } from '../../components/button';
 import { Header } from '../../components/header';
 import { Input } from '../../components/input';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { TextInput } from 'react-native-gesture-handler';
 import { User } from '../../services/user';
 import firebase from 'firebase';
 import { useForm } from 'react-hook-form';
@@ -60,8 +59,8 @@ export function LoginScreen() {
       );
 
       User.authenticated.next(result.user);
-    } catch (error) {
-      alert(error.message);
+    } catch (e) {
+      alert(e.message);
       setIsLoading(false);
     }
   }

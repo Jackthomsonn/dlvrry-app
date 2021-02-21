@@ -4,6 +4,8 @@ import { StyleSheet, Text, View } from 'react-native';
 
 import { Button } from "../button";
 import { Job } from '../../services/job';
+import { JobStatusLabel } from '../job-status-label';
+import { User } from '../../services/user';
 import { useNavigation } from "@react-navigation/native";
 import { variables } from "../../../Variables";
 
@@ -12,7 +14,7 @@ const styles = StyleSheet.create({
     backgroundColor: variables.secondaryColor,
     padding: 24,
     flex: 1,
-    marginTop: 24,
+    marginTop: 20,
     borderRadius: 12,
     display: 'flex',
     flexDirection: 'row',
@@ -66,35 +68,12 @@ export const JobCard = (props: JobCardProps) => {
     try {
       setIsLoading(true);
 
-      await Job.cancelJob(id);
+      await Job.cancelJob(id, User.storedUserId, 0); // Cloud function to work out cancelled jobs
 
       setIsLoading(false);
     } catch (e) {
       alert(e);
       setIsLoading(false);
-    }
-  }
-
-  const handleJobStatus = (status: string) => {
-    if (status === JobStatus.COMPLETED) {
-      return <Text style={{ color: variables.success }}>Completed</Text>;
-    } else if (status === JobStatus.IN_PROGRESS) {
-      return <Text style={{ color: variables.success }}>In progress</Text>;
-    } else if (status === JobStatus.CANCELLED) {
-      return (
-        <>
-          <Text style={{ color: variables.warning, marginBottom: 12 }}>Cancelled by rider. Job is still awaiting a rider to accept</Text>
-          <Button type="primary" title={'Cancel job'} onPress={() => cancelJob(props.job.id)} loading={isLoading} />
-        </>
-      )
-    }
-    else {
-      return (
-        <>
-          <Text style={{ color: variables.success, marginBottom: 12 }}> Awaiting acceptance</Text>
-          <Button type="primary" title={'Cancel job'} onPress={() => cancelJob(props.job.id)} loading={isLoading} />
-        </>
-      );
     }
   }
 
@@ -110,9 +89,9 @@ export const JobCard = (props: JobCardProps) => {
               ? <Button
                 type="primary"
                 title="Accept job"
-                onPress={() => acceptJob(props.job.id, props.user.id)}
+                onPress={() => acceptJob(props.job.id, props.user?.id)}
                 loading={isLoading} />
-              : handleJobStatus(props.job.status)
+              : <JobStatusLabel id={props.job.id} status={props.job.status} cb={cancelJob} isLoading={isLoading} />
           }
         </View>
       </View>

@@ -1,6 +1,7 @@
-import { AccountType, IJob } from 'dlvrry-common';
-import React, { useEffect, useState } from 'react';
-import { SafeAreaView, StyleSheet, Text, View } from 'react-native';
+import { AccountType, IJob, IUser, JobStatus } from 'dlvrry-common';
+import { Image, SafeAreaView, SectionList, StyleSheet, Text, View } from 'react-native';
+import React, { useState } from 'react';
+import { useCollectionData, useDocumentData } from 'react-firebase-hooks/firestore';
 import { useFocusEffect, useNavigation } from "@react-navigation/native";
 
 import { Button } from '../../components/button';
@@ -10,12 +11,12 @@ import { Job } from "../../services/job";
 import { JobCard } from '../../components/job-card';
 import { Loader } from '../../components/loader';
 import { User } from "../../services/user";
-import { useCollectionData } from 'react-firebase-hooks/firestore';
+import { variables } from '../../../Variables';
 
 const styles = StyleSheet.create({
   host: {
     flex: 1,
-    backgroundColor: '#FFF'
+    backgroundColor: variables.light
   }
 });
 
@@ -23,19 +24,32 @@ export function HomeScreen() {
   const navigation = useNavigation();
 
   const [ businessHasConnectedCard, setBusinessHasConnectedCard ] = useState(false);
+  const [ user, userLoading, userError ] = useDocumentData<IUser>(User.getUser(User.storedUserId));
 
-  const [ jobs, loading, error ] = useCollectionData<IJob>(
-    User.storedUser.account_type === AccountType.RIDER
-      ? Job.getJobs()
-      : Job.getJobsForBusiness(User.storedUser.id)
+  const [ jobsPendingOrCancelled, jobsPendingOrCancelledLoading, jobsPendingOrCancelledError ] = useCollectionData<IJob>(
+    user && user.account_type && user.account_type === AccountType.RIDER
+      ? Job.getJobs([ JobStatus.PENDING, JobStatus.CANCELLED ])
+      : Job.getJobsForBusiness(User.storedUserId, [ JobStatus.PENDING, JobStatus.CANCELLED ])
+  )
+
+  const [ jobsAwaitingPayment, jobsAwaitingPaymentLoading, jobsAwaitingPaymentError ] = useCollectionData<IJob>(
+    user && user.account_type && user.account_type === AccountType.BUSINESS
+      ? Job.getJobsForBusiness(User.storedUserId, [ JobStatus.AWAITING_PAYMENT ])
+      : undefined
+  )
+
+  const [ jobsCompleted, jobsCompletedLoading, jobsCompletedError ] = useCollectionData<IJob>(
+    user && user.account_type && user.account_type === AccountType.BUSINESS
+      ? Job.getJobsForBusiness(User.storedUserId, [ JobStatus.COMPLETED ])
+      : undefined
   )
 
   const getConnectedCards = async () => {
-    if (!User.storedUser || !User.storedUser.customer_id) {
+    if (!user || !user.customer_id) {
       return;
     }
 
-    const response = await User.getCards(User.storedUser.customer_id);
+    const response = await User.getCards(user.customer_id);
 
     setBusinessHasConnectedCard(response.length > 0);
   }
@@ -46,9 +60,17 @@ export function HomeScreen() {
         <Header main="Available" sub="jobs"></Header>
         <View style={{ padding: 24, flex: 1 }}>
           {
-            jobs && jobs.length > 0
-              ? <FlatList showsVerticalScrollIndicator={false} data={jobs} keyExtractor={(_item, index) => index.toString()} renderItem={({ item }) => <JobCard user={User.storedUser} job={item} account_type={User.storedUser.account_type} />}></FlatList>
-              : <Text>No jobs available</Text>
+            jobsPendingOrCancelled && jobsPendingOrCancelled.length > 0
+              ? <FlatList showsVerticalScrollIndicator={false} data={jobsPendingOrCancelled} keyExtractor={(_item, index) => index.toString()} renderItem={({ item }) => <JobCard user={user} job={item} account_type={user.account_type} />}></FlatList>
+              : <>
+                <View style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}>
+                  <Image source={require('../../../assets/no-results.png')} style={{
+                    width: 180,
+                    height: 180
+                  }} />
+                  <Text style={{ fontWeight: '500', color: variables.secondaryColor, fontSize: 16, marginTop: 12 }}>No jobs found</Text>
+                </View>
+              </>
           }
         </View>
       </>
@@ -59,20 +81,78 @@ export function HomeScreen() {
     return (
       <>
         <Header main="Your listed" sub="jobs"></Header>
-        <View style={{ padding: 24, flex: 10 }}>
-          {
-            jobs && jobs.length > 0
-              ? <FlatList showsVerticalScrollIndicator={false} data={jobs} keyExtractor={(_item, index) => index.toString()} renderItem={({ item }) => <JobCard user={User.storedUser} job={item} account_type={User.storedUser.account_type} />}>
-              </FlatList>
-              : <Text>You have no listed jobs available</Text>
-          }
+        <View style={{
+          padding: 24,
+          flex: 1,
+          paddingBottom: 214
+        }}>
+          <SectionList
+            showsHorizontalScrollIndicator={false}
+            showsVerticalScrollIndicator={false}
+            renderItem={({ item }) => <JobCard user={user} job={item} account_type={user.account_type} />}
+            keyExtractor={(item, index) => item.id + index}
+            renderSectionHeader={({ section: { title } }) => (
+              <View style={{ backgroundColor: variables.light, paddingBottom: 24 }}>
+                <Header main={title} sub="jobs" hideAvatar={true} subheader={true}></Header>
+              </View>
+            )}
+            sections={[ {
+              title: 'Active',
+              data: jobsPendingOrCancelled
+            }, {
+              title: 'Pending',
+              data: jobsAwaitingPayment
+            }, {
+              title: 'Completed',
+              data: jobsCompleted
+            } ]}>
+
+          </SectionList>
 
         </View>
-        <View style={{ flex: 1, padding: 24 }}>
+        <View style={{
+          borderTopLeftRadius: 20,
+          borderTopRightRadius: 20,
+          padding: 48,
+          backgroundColor: variables.light,
+          shadowColor: '#CCC',
+          shadowOffset: {
+            width: 1,
+            height: 1
+          },
+          shadowOpacity: 0.5,
+          shadowRadius: 20,
+          position: 'absolute',
+          bottom: 0,
+          width: '100%',
+          marginBottom: 0,
+          display: 'flex',
+          justifyContent: 'center'
+        }}>
           {
             businessHasConnectedCard
-              ? <Button type="primary" title="Create new job" onPress={() => navigation.navigate('CreateJob')}></Button>
-              : <Button type="primary" title="Add card" onPress={() => navigation.navigate('AddCard', { customer_id: User.storedUser.customer_id })}></Button>
+              ? <>
+                <View style={{ borderTopLeftRadius: 50, borderTopRightRadius: 50, flexDirection: 'row', height: 40, backgroundColor: variables.light, }}>
+                  <View style={{ width: '50%', display: 'flex', justifyContent: 'center', alignItems: 'flex-start' }}>
+                    <Text style={{ fontWeight: '500', color: variables.primaryColor, fontSize: 16, textAlign: 'center' }}>Active</Text>
+                    <Text style={{ fontWeight: '700', color: variables.secondaryColor, fontSize: 18, textAlign: 'center' }}>{jobsPendingOrCancelled.length}</Text>
+                  </View>
+                  <View style={{ borderTopRightRadius: 50, width: '50%', justifyContent: 'center', alignItems: 'flex-start' }}>
+                    <Text style={{ fontWeight: '500', color: variables.primaryColor, fontSize: 16, textAlign: 'center' }}>Awaiting payment</Text>
+                    <Text style={{ fontWeight: '700', color: variables.secondaryColor, fontSize: 18, textAlign: 'center' }}>{jobsAwaitingPayment.length}</Text>
+                  </View>
+                </View>
+                <View style={{ borderTopLeftRadius: 50, borderTopRightRadius: 50, flexDirection: 'row', height: 40, backgroundColor: variables.light, marginTop: 24 }}>
+                  <View style={{ width: '50%', display: 'flex', justifyContent: 'center', alignItems: 'flex-start' }}>
+                    <Text style={{ fontWeight: '500', color: variables.primaryColor, fontSize: 16, textAlign: 'center' }}>Completed</Text>
+                    <Text style={{ fontWeight: '700', color: variables.secondaryColor, fontSize: 18, textAlign: 'center', marginBottom: 24 }}>{jobsCompleted.length}</Text>
+                  </View>
+                </View>
+                <View style={{ marginBottom: 24 }}>
+                  <Button type="primary" title="Create new job" onPress={() => navigation.navigate('CreateJob')}></Button>
+                </View>
+              </>
+              : <Button type="primary" title="Add card" onPress={() => navigation.navigate('AddCard', { customer_id: user.customer_id })}></Button>
           }
         </View>
       </>
@@ -86,16 +166,17 @@ export function HomeScreen() {
   return (
     <SafeAreaView style={styles.host}>
       {
-        loading
+        jobsPendingOrCancelledLoading || jobsAwaitingPaymentLoading || jobsCompletedLoading
           ? <Loader />
-          : User.storedUser.account_type === AccountType.RIDER
+          : user && user.account_type && user.account_type === AccountType.RIDER
             ? riderView()
             : businessView()
       }
 
-      {
-        error ? <Text>{error}</Text> : undefined
-      }
+      <Text>{jobsPendingOrCancelledError ? jobsPendingOrCancelledError : undefined}</Text>
+      <Text>{jobsAwaitingPaymentError ? jobsAwaitingPaymentError : undefined}</Text>
+      <Text>{jobsCompletedError ? jobsCompletedError : undefined}</Text>
+
     </SafeAreaView >
   );
 }

@@ -1,8 +1,8 @@
+import { AccountType, IUser, VerificationStatus } from 'dlvrry-common';
 import { Linking, Text, View } from 'react-native';
 import React, { createRef, useEffect, useState } from 'react';
 import { ScrollView, TouchableOpacity } from "react-native-gesture-handler";
 
-import { AccountType } from 'dlvrry-common';
 import ActionSheet from 'react-native-actions-sheet';
 import { Button } from '../button';
 import { Ionicons } from '@expo/vector-icons';
@@ -15,7 +15,9 @@ import { variables } from '../../../Variables';
 interface HeaderProps {
   main: string,
   sub: string,
-  showBackButton?: boolean
+  showBackButton?: boolean,
+  hideAvatar?: boolean,
+  subheader?: boolean
 }
 
 export const Header = (props: HeaderProps) => {
@@ -23,6 +25,7 @@ export const Header = (props: HeaderProps) => {
   const [ isLoading, setIsLoading ] = useState(false);
   const [ isLoggingOut, setIsLoggingOut ] = useState(false);
   const [ isGettingCards, setIsGettingCards ] = useState(false);
+
   const actionSheetRef: any = createRef();
   const navigation = useNavigation();
 
@@ -80,7 +83,7 @@ export const Header = (props: HeaderProps) => {
   const goToDashboard = async () => {
     setIsLoading(true);
 
-    const loginLink = await User.getLoginLink(User.storedUser.id);
+    const loginLink = await User.getLoginLink(User.storedUser?.id);
 
     setIsLoading(false);
     Linking.openURL(loginLink.data.url);
@@ -129,7 +132,7 @@ export const Header = (props: HeaderProps) => {
 
   return (
     <>
-      <View style={{ paddingTop: 24, paddingLeft: 24, paddingRight: 24, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+      <View style={{ paddingTop: 24, paddingLeft: props.hideAvatar ? 0 : 24, paddingRight: 24, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
         {
           props.showBackButton
             ? <View style={{ flexDirection: 'row', flex: 1 }}>
@@ -140,11 +143,11 @@ export const Header = (props: HeaderProps) => {
             : undefined
         }
         <View style={{ flexDirection: 'row', flex: 5 }}>
-          <Text style={{ color: variables.dark, fontWeight: '700', fontSize: 32 }}>{props.main}</Text>
-          <Text style={{ color: variables.dark, fontWeight: '300', fontSize: 32 }}> {props.sub}</Text>
+          <Text style={{ color: variables.dark, fontWeight: props.subheader ? '500' : '700', fontSize: props.subheader ? 22 : 32 }}>{props.main}</Text>
+          <Text style={{ color: variables.dark, fontWeight: '300', fontSize: props.subheader ? 22 : 32 }}> {props.sub}</Text>
         </View>
         {
-          User.storedUser
+          User.storedUser && !props.hideAvatar
             ? <View style={{ flexDirection: 'row', backgroundColor: variables.primaryColor, width: 50, height: 50, borderRadius: 100, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
               <TouchableOpacity
                 hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
@@ -162,7 +165,7 @@ export const Header = (props: HeaderProps) => {
             {genericActionSheet()}
 
             {
-              User.storedUser && User.storedUser.account_type === AccountType.RIDER ? riderActionSheet() : businessActionSheet()
+              User.storedUser && User.storedUser.account_type && User.storedUser.account_type === AccountType.RIDER ? riderActionSheet() : businessActionSheet()
             }
           </View>
         </ScrollView>

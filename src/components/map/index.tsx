@@ -6,6 +6,7 @@ import React, { useEffect, useState } from "react";
 
 import Constants from 'expo-constants';
 import MapViewDirections from "react-native-maps-directions"
+import { variables } from '../../../Variables';
 
 interface MapProps {
   customerAddress: {
@@ -15,7 +16,8 @@ interface MapProps {
   pickupAddress: {
     latitude: number,
     longitude: number
-  }
+  },
+  duration: Function
 }
 
 export const Map = (props: MapProps) => {
@@ -45,23 +47,24 @@ export const Map = (props: MapProps) => {
   return (
     isReady
       ? <MapView
+        provider={'google'}
         ref={ref => { map = ref }}
         style={{
           display: 'flex',
-          height: '70%',
+          height: '100%',
           width: '100%'
         }}
-        provider={'google'}
-        initialCamera={{
-          zoom: 1000,
+        camera={{
+          zoom: 30,
           center: {
             latitude: usersCurrentLocation?.coords.latitude,
             longitude: usersCurrentLocation?.coords.longitude
           },
-          altitude: 1,
+          altitude: usersCurrentLocation?.coords.altitude,
           pitch: 50,
-          heading: 0
+          heading: usersCurrentLocation?.coords.heading
         }}
+        mapPadding={{ bottom: 150, top: 0, left: 0, right: 0 }}
         // onUserLocationChange={(e) => {
         //   map.animateCamera({
         //     center: {
@@ -70,6 +73,8 @@ export const Map = (props: MapProps) => {
         //     }
         //   })
         // }}
+        showsPointsOfInterest={false}
+        loadingEnabled={true}
         showsUserLocation={true}
         followsUserLocation={true}>
 
@@ -85,8 +90,11 @@ export const Map = (props: MapProps) => {
           destination={{ latitude: props.customerAddress.latitude, longitude: props.customerAddress.longitude }}
           apikey={Constants.manifest.extra.apiKey}
           strokeWidth={3}
-          strokeColor={'hotpink'}
+          strokeColor={variables.primaryColor}
           precision={'high'}
+          onReady={result => {
+            props.duration(result.duration);
+          }}
         />
         <Marker coordinate={{ latitude: props.pickupAddress.latitude, longitude: props.pickupAddress.longitude }} title={'Pickup location'}></Marker>
         <Marker coordinate={{ latitude: props.customerAddress.latitude, longitude: props.customerAddress.longitude }} title={'Customer location'}></Marker>

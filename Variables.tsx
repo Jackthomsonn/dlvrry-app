@@ -1,7 +1,7 @@
 export const variables = {
   primaryColor: '#E63462',
   secondaryColor: '#3F3047',
-  tertiaryColor: '#FCF7F4',
+  tertiaryColor: '#F2F4F3',
 
   light: '#FFF',
   dark: '#034748',

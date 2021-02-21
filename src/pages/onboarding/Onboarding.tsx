@@ -4,13 +4,11 @@ import { ActivityIndicator, Linking, SafeAreaView, StyleSheet, Text, View } from
 import { IUser, VerificationStatus } from 'dlvrry-common';
 import React, { useEffect, useState } from 'react';
 
-import AsyncStorage from '@react-native-community/async-storage';
 import { Button } from "../../components/button";
 import Constants from 'expo-constants';
 import { Header } from '../../components/header';
-import { IUserData } from '../../interfaces/IUserData';
-import { StorageKey } from '../../enums/Storage.enum';
 import { User } from "../../services/user";
+import { useDocumentData } from 'react-firebase-hooks/firestore';
 import { useNavigation } from "@react-navigation/native";
 import { variables } from "../../../Variables";
 
@@ -59,86 +57,62 @@ const styles = StyleSheet.create({
 export function OnboardingScreen() {
   const navigation = useNavigation();
 
-  const [ accountNeedsVerification, setAccountNeedsVerification ] = useState(false);
+  const [ accountHasPendingActions, setAccountHasPendingActions ] = useState(false);
+  const [ checkingForPendingAccountActions, setCheckingForPendingAccountActions ] = useState(false);
   const [ loginLink, setLoginLink ] = useState(undefined);
-  const [ isLoading, setIsLoading ] = useState(false);
+  const [ onboardingActionIsInProcess, setOnboardingActionIsInProcess ] = useState(false);
 
-  const getUserStatus = async (user: IUser) => {
-    try {
-      const loginLink = await User.getLoginLink(user.id);
-      const stripeUserDetails = await User.getConnectedAccountDetails(user.id);
+  const [ user ] = useDocumentData<IUser>(User.getUser(User.storedUserId));
 
-      setLoginLink(loginLink.data.url);
+  const startOnboardingProcess = async () => {
+    if (onboardingActionIsInProcess) return;
 
-      if (!stripeUserDetails.data.requirements.disabled_reason) {
-        await AsyncStorage.setItem(StorageKey.ONBOARDING_STATUS, VerificationStatus.COMPLETED);
+    const redirectUri = AuthSession.makeRedirectUri({ useProxy: true });
 
-        User.updateUser(User.storedUser.id, { verification_status: VerificationStatus.COMPLETED });
+    const response = await User.onboardUser(
+      user?.id,
+      user.email,
+      `${ Constants.manifest.extra.functionsUri }/refreshAccountLink`,
+      redirectUri
+    );
 
-        setAccountNeedsVerification(false);
+    const result = await AuthSession.startAsync({
+      authUrl: `${ response.data }?redirect_uri=${ redirectUri }`
+    });
 
-        setIsLoading(false);
+    // Handle these cases correctly
+    if (result.type === 'success') {
+      setOnboardingActionIsInProcess(false);
+    }
 
-        navigation.navigate('Home');
-      } else {
-        await AsyncStorage.setItem(StorageKey.ONBOARDING_STATUS, VerificationStatus.NEEDS_VERIFICATION);
-
-        User.updateUser(User.storedUser.id, { verification_status: VerificationStatus.NEEDS_VERIFICATION });
-
-        setAccountNeedsVerification(true);
-
-        setIsLoading(false);
-      }
-    } catch (e) {
-      alert(e);
+    if (result.type === 'error' || result.type === 'cancel') {
+      alert('Something went wrong');
+      setOnboardingActionIsInProcess(false);
     }
   }
 
-  const refresh = () => {
-    setIsLoading(true);
-    getUserStatus(User.storedUser);
-  }
+  const handleUserVerificationStatus = async () => {
+    switch (user?.verification_status) {
+      case VerificationStatus.PENDING_VERIFICATION:
+        setCheckingForPendingAccountActions(true);
 
-  const setup = async () => {
-    try {
-      const redirectUri = AuthSession.makeRedirectUri({ useProxy: true });
+        break;
+      case VerificationStatus.PAST_DUE:
+        const loginLink = await User.getLoginLink(user?.id);
 
-      if (User.storedUser && User.storedUser.verification_status === VerificationStatus.COMPLETED) {
+        setCheckingForPendingAccountActions(false);
+        setAccountHasPendingActions(true);
+        setLoginLink(loginLink.data.url);
+
+        break;
+      case VerificationStatus.PENDING || VerificationStatus.CANCELLED || VerificationStatus.FAILED:
+        setOnboardingActionIsInProcess(true);
+        startOnboardingProcess();
+
+        break;
+      case VerificationStatus.COMPLETED:
         navigation.navigate('Home');
-        return;
-      }
-
-      if (!User.storedUser || !User.storedUser.id) {
-        return;
-      }
-
-      const onboardingStatus = await User.getUser(User.storedUser.id).get();
-
-      if (onboardingStatus.data().verification_status === VerificationStatus.NEEDS_VERIFICATION) {
-        setAccountNeedsVerification(true);
-        getUserStatus(User.storedUser);
-        setIsLoading(false);
-      } else {
-        const response = await User.onboardUser(
-          User.storedUser.email,
-          `${ Constants.manifest.extra.functionsUri }/refreshAccountLink`,
-          redirectUri
-        );
-
-        await AsyncStorage.setItem(StorageKey.ONBOARDING_STATUS, VerificationStatus.PENDING);
-
-        const result = await AuthSession.startAsync({
-          authUrl: `${ response.data }?redirect_uri=${ redirectUri }`
-        });
-
-        if (result.type === 'success') {
-          getUserStatus(User.storedUser);
-        } else {
-          await AsyncStorage.setItem(StorageKey.ONBOARDING_STATUS, VerificationStatus.CANCELLED);
-        }
-      }
-    } catch (e) {
-      alert(e);
+        break;
     }
   }
 
@@ -149,7 +123,7 @@ export function OnboardingScreen() {
         <View style={styles.verifyHost}>
           <View style={styles.verifyBox}>
             <Text style={styles.text}>
-              Nearly done! Click the link below to provide some verification documents to make sure everyone is safe on Dlvrry
+              It looks like you have some outstanding actions on your account. In order to continue using Dlvrry please click the link below
               </Text>
           </View>
           <View style={styles.loginLinkHost}>
@@ -160,12 +134,6 @@ export function OnboardingScreen() {
                     type={'secondary'}
                     onPress={() => Linking.openURL(loginLink)}
                     title="Complete onboarding" />
-                  <View style={{ marginTop: 8 }}>
-                    <Button
-                      type={'primaryNoBorder'}
-                      title="Refresh"
-                      onPress={() => refresh()} />
-                  </View>
                 </>
                 : <ActivityIndicator />
             }
@@ -182,22 +150,27 @@ export function OnboardingScreen() {
 
         <View style={styles.onboardHost}>
           <ActivityIndicator />
+          <Text>Loading..</Text>
         </View>
       </>
     );
   }
 
   useEffect(() => {
-    setIsLoading(true);
-    setup();
-  }, []);
+    handleUserVerificationStatus();
+  }, [ user ]);
 
   return (
     <SafeAreaView style={styles.host}>
       {
-        isLoading
-          ? <ActivityIndicator />
-          : accountNeedsVerification
+        checkingForPendingAccountActions
+          ? <>
+            <View style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+              <ActivityIndicator />
+              <Text>Verifying information..</Text>
+            </View>
+          </>
+          : accountHasPendingActions
             ? verifyStep()
             : onboardStep()
       }

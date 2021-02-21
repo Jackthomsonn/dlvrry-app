@@ -7,7 +7,8 @@
     "env:dev": "expo-env --env=development",
     "env:prod": "expo-env --env=prod",
     "deploy:ios": "npm run env:prod && expo build ios --release-channel staging",
-    "deploy:android": "npm run env:prod && expo build android --release-channel staging"
+    "deploy:android": "npm run env:prod && expo build android --release-channel staging",
+    "findUsedPort": " netstat -vanp tcp | grep 8080"
   },
   "dependencies": {
     "@react-native-community/async-storage": "^1.12.1",
@@ -15,12 +16,12 @@
     "@react-navigation/bottom-tabs": "^5.2.1",
     "@react-navigation/native": "^5.1.0",
     "@react-navigation/stack": "^5.2.1",
+    "@reduxjs/toolkit": "^1.5.0",
     "@stripe/react-stripe-js": "^1.1.2",
     "@stripe/stripe-js": "^1.11.0",
     "axios": "^0.21.0",
     "base-64": "^0.1.0",
-    "calculate-percentages": "^1.0.0",
-    "dlvrry-common": "0.0.5",
+    "dlvrry-common": "0.0.9",
     "expo": "^39.0.0",
     "expo-app-auth": "~9.2.0",
     "expo-auth-session": "~2.0.0",
@@ -29,7 +30,7 @@
     "expo-payments-stripe": "~8.3.0",
     "expo-web-browser": "~8.5.0",
     "firebase": "8.1.1",
-    "percent-value": "^1.0.9",
+    "moment": "^2.29.1",
     "react": "16.13.1",
     "react-dom": "16.13.1",
     "react-firebase-hooks": "^2.2.0",
@@ -46,6 +47,7 @@
     "react-native-screens": "~2.10.1",
     "react-native-web": "~0.13.7",
     "react-native-webview": "^11.0.2",
+    "react-redux": "^7.2.2",
     "redux": "^4.0.5",
     "rxjs": "^6.6.3",
     "stripe": "^8.131.1",
@@ -59,6 +61,7 @@
     "babel-preset-expo": "^8.3.0",
     "expo-env": "^1.1.1",
     "mem": ">=4.0.0",
+    "redux-devtools": "^3.7.0",
     "typescript": "~3.9.2"
   },
   "private": true

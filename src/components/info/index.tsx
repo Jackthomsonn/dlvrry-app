@@ -1,59 +1,94 @@
-import { Text, View } from "react-native"
+import React, { useState } from "react";
+import { Text, View } from "react-native";
 
-import { Button } from "../button"
+import { Button } from "../button";
 import { IJob } from "dlvrry-common";
-import { Job } from "../../services/job"
-import React from "react"
-import { useNavigation } from "@react-navigation/native"
-import { variables } from "../../../Variables"
+import { Job } from "../../services/job";
+import moment from 'moment';
+import { useNavigation } from "@react-navigation/native";
+import { variables } from "../../../Variables";
 
 interface InfoProps {
-  job: IJob
+  job: IJob,
+  duration: number
 }
 
 export const Info = (props: InfoProps) => {
   const navigation = useNavigation();
+  const [ isCancellingJob, setIsCancellingJob ] = useState(false);
+  const [ isCompletingJob, setIsCompletingJob ] = useState(false);
 
   const cancelJob = async () => {
     try {
+      setIsCancellingJob(true);
       await Job.cancelJob(props.job.id);
+      setIsCancellingJob(false);
       navigation.goBack();
     } catch (e) {
+      setIsCancellingJob(false);
       alert(e);
     }
   }
 
   const completeJob = async () => {
     try {
+      setIsCompletingJob(true);
       await Job.completeJob(props.job);
+      setIsCompletingJob(false);
       navigation.goBack();
     } catch (e) {
+      setIsCompletingJob(false);
       alert(e);
     }
   }
 
   return (
     <>
-      <View style={{ height: '15%', backgroundColor: variables.light, display: 'flex', flexDirection: 'row', justifyContent: 'space-between' }}>
-        <View style={{ backgroundColor: variables.tertiaryColor, width: '50%', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-          <Text>Business</Text>
-          <Text style={{ fontWeight: '700', color: variables.dark }}>{props.job.owner_name}</Text>
+      <View style={{
+        position: 'absolute',
+        bottom: 168,
+        borderTopLeftRadius: 20,
+        borderTopRightRadius: 20,
+        height: '15%',
+        backgroundColor: variables.light,
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'space-between',
+        shadowColor: '#CCC',
+        shadowOffset: {
+          width: 1,
+          height: 1
+        },
+        shadowOpacity: 1,
+        shadowRadius: 20
+      }}>
+        <View style={{ borderTopLeftRadius: 50, borderTopRightRadius: 50, flexDirection: 'row', height: 100, backgroundColor: variables.light, }}>
+          <View style={{ width: '50%', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+            <Text style={{ fontWeight: '500', color: variables.primaryColor, fontSize: 16 }}>Business</Text>
+            <Text style={{ fontWeight: '700', color: variables.secondaryColor, fontSize: 18 }}>{props.job.owner_name}</Text>
+          </View>
+          <View style={{ borderTopRightRadius: 50, width: '50%', justifyContent: 'center', alignItems: 'center' }}>
+            <Text style={{ fontWeight: '500', color: variables.primaryColor, fontSize: 16 }}>Payout</Text>
+            <Text style={{ fontWeight: '700', color: variables.secondaryColor, fontSize: 18 }}>£{(props.job.payout / 100).toFixed(2)}</Text>
+          </View>
         </View>
-        <View style={{ backgroundColor: variables.tertiaryColor, width: '50%', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-          <Text>Payout</Text>
-          <Text style={{ fontWeight: '700', color: variables.dark }}>£{props.job.payout / 100}</Text>
+
+        <View style={{ flexDirection: 'row', height: 50, backgroundColor: variables.light, }}>
+          <View style={{ borderTopRightRadius: 50, width: '50%', justifyContent: 'center', alignItems: 'center' }}>
+            <Text style={{ fontWeight: '500', color: variables.primaryColor, fontSize: 16 }}>Number of items</Text>
+            <Text style={{ fontWeight: '700', color: variables.secondaryColor, fontSize: 18 }}>{props.job.number_of_items}</Text>
+          </View>
+          <View style={{ borderTopRightRadius: 50, width: '50%', justifyContent: 'center', alignItems: 'center' }}>
+            <Text style={{ fontWeight: '500', color: variables.primaryColor, fontSize: 16 }}>ETA</Text>
+            <Text style={{ fontWeight: '700', color: variables.secondaryColor, fontSize: 18 }}>{props.duration ? moment().add(props.duration, 'minutes').format('HH:MM') : <Text>Calculating</Text>}</Text>
+          </View>
         </View>
-      </View>
-      <View style={{ display: 'flex', flexDirection: 'row', height: '15%', justifyContent: 'space-between' }}>
-        <View style={{ backgroundColor: variables.light, width: '25%', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-          <Text style={{ color: variables.dark }}>Status</Text>
-          <Text style={{ fontWeight: '700', color: variables.dark }}>Job started</Text>
-        </View>
-        <View style={{ backgroundColor: variables.light, width: '35%', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-          <Button type="primary" title="Cancel job" onPress={() => cancelJob()}></Button>
-        </View>
-        <View style={{ backgroundColor: variables.light, width: '40%', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-          <Button type="primary" title="Complete job" onPress={() => completeJob()}></Button>
+
+        <View style={{ height: 140, backgroundColor: variables.light, justifyContent: 'center', alignItems: 'center' }}>
+          <View style={{ width: '80%' }}>
+            <Button title={'Complete job'} onPress={() => completeJob()} type={'primary'} loading={isCompletingJob} />
+            <Button title={'Cancel job'} onPress={() => cancelJob()} type='link' loading={isCancellingJob} loaderColor={variables.dark} />
+          </View>
         </View>
       </View>
     </>

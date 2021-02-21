@@ -5,10 +5,10 @@ import "firebase/firestore";
 import React, { useState } from 'react';
 import { decode, encode } from 'base-64';
 
-import AsyncStorage from '@react-native-community/async-storage';
 import { AuthStackScreen } from './src/navigation/AuthStackNavigation';
 import Constants from 'expo-constants';
 import { HomeStackScreen } from './src/navigation/HomeStackNavigation';
+import { IUser } from 'dlvrry-common';
 import { NavigationContainer } from '@react-navigation/native';
 import { RiderScreen } from './src/pages/rider/Rider';
 import { SplashScreen } from './src/pages/splash/Splash';
@@ -21,10 +21,6 @@ if (!global[ 'btoa' ]) { global[ 'btoa' ] = encode }
 if (!global[ 'atob' ]) { global[ 'atob' ] = decode }
 
 const Tab = createBottomTabNavigator();
-
-// AsyncStorage.clear();
-// firebase.auth().signOut();
-// User.storedUser = undefined;
 
 export default function App() {
   const [ isLoggedIn, setLoggedInState ] = useState(false);
@@ -52,14 +48,13 @@ export default function App() {
   }
 
   firebase.auth().onAuthStateChanged(async user => {
-    await User.requestAndSetStoredUser();
-
-    setTimeout(async () => {
-      if (user) {
-        setIsLoadingState(false);
-        setLoggedInState(true);
-      }
-    }, 2000);
+    if (user) {
+      User.storedUserId = user.uid;
+      const userData: any = await User.getUser(user.uid).get();
+      User.storedUser = userData.data();
+      setIsLoadingState(false);
+      setLoggedInState(true);
+    }
 
     if (!user) {
       setIsLoadingState(false);
@@ -70,12 +65,8 @@ export default function App() {
 
   User.authenticated.subscribe(async (user: firebase.User) => {
     if (user) {
-      setIsLoadingState(true);
-      await User.setupStoredUser(user);
-      setTimeout(() => {
-        setLoggedInState(true);
-        setIsLoadingState(false);
-      }, 2000);
+      setLoggedInState(true);
+      setIsLoadingState(false);
     }
   });
 

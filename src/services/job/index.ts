@@ -6,15 +6,16 @@ import { User } from './../user/index';
 import firebase from 'firebase';
 
 export class Job {
-  static getJobs() {
+  static getJobs(statuses: JobStatus[]) {
     return firebase
       .firestore()
       .collection('jobs')
-      .where('status', 'in', [ JobStatus.PENDING, JobStatus.CANCELLED ])
+      .where('status', 'in', statuses)
+      .where('payment_captured', '==', true);
   }
 
-  static getJobsForBusiness(id: string) {
-    return firebase.firestore().collection('jobs').where('owner_id', '==', id);
+  static getJobsForBusiness(id: string, statuses: JobStatus[]) {
+    return firebase.firestore().collection('jobs').where('owner_id', '==', id).where('status', 'in', statuses);
   }
 
   static async getJob(id: string) {
@@ -32,22 +33,14 @@ export class Job {
   }
 
   // Turn this into a function
-  static async cancelJob(id: string) {
-    const job = firebase.firestore().collection('jobs').doc(id);
+  static async cancelJob(id: string, userId: string) {
+    const token = await firebase.auth().currentUser.getIdToken();
 
-    const job_data = await job.get();
-
-    if (User.storedUser.id !== job_data.data().owner_id) {
-      const rider_id = job_data.data().rider_id;
-
-      let cancelled_jobs = User.storedUser.cancelled_jobs;
-
-      await job.update({ status: JobStatus.CANCELLED });
-
-      await User.updateUser(rider_id, { cancelled_jobs: cancelled_jobs + 1 });
-    } else {
-      await job.delete();
-    }
+    return await Axios.post<string, AxiosResponse<string>>(`${ Constants.manifest.extra.functionsUri }/cancelJob`, { id }, {
+      headers: {
+        'Authorization': token
+      }
+    });
   }
 
   static async completeJob(job: IJob) {
@@ -60,10 +53,10 @@ export class Job {
     });
   }
 
-  static async createJob(job: IJob, owner_id: string) {
+  static async createJob(job: IJob, rider_id: string) {
     const token = await firebase.auth().currentUser.getIdToken();
 
-    return await Axios.post<string, AxiosResponse<string>>(`${ Constants.manifest.extra.functionsUri }/createJob`, { job, owner_id }, {
+    return await Axios.post<any, AxiosResponse<any>>(`${ Constants.manifest.extra.functionsUri }/createJob`, { job, rider_id }, {
       headers: {
         'Authorization': token
       }
