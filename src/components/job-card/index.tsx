@@ -68,7 +68,7 @@ export const JobCard = (props: JobCardProps) => {
     try {
       setIsLoading(true);
 
-      await Job.cancelJob(id, User.storedUserId, 0); // Cloud function to work out cancelled jobs
+      await Job.cancelJob(id);
 
       setIsLoading(false);
     } catch (e) {

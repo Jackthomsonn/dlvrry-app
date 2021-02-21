@@ -32,8 +32,7 @@ export class Job {
     });
   }
 
-  // Turn this into a function
-  static async cancelJob(id: string, userId: string) {
+  static async cancelJob(id: string) {
     const token = await firebase.auth().currentUser.getIdToken();
 
     return await Axios.post<string, AxiosResponse<string>>(`${ Constants.manifest.extra.functionsUri }/cancelJob`, { id }, {

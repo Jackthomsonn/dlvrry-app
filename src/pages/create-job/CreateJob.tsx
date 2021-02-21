@@ -43,7 +43,7 @@ export const CreateJobScreen = () => {
   const navigation = useNavigation();
 
   const [ isSubmitting, setIsSubmitting ] = useState(false);
-  const [ user, userLoading, userError ] = useDocumentData<IUser>(User.getUser(User.storedUserId));
+  const [ user ] = useDocumentData<IUser>(User.getUser(User.storedUserId));
 
   const { register, handleSubmit, setValue, errors } = useForm();
 
@@ -62,8 +62,6 @@ export const CreateJobScreen = () => {
         const authCompleted = CardService.authenticationCompleted.subscribe((result) => {
           if (!result.completed) {
             alert(result.message);
-          } else {
-            response.data
           }
 
           navigation.goBack();

@@ -39,8 +39,6 @@ export function HomeStackScreen() {
     )
   }
 
-  console.log(user);
-
   return (
     userLoading || !user
       ? <ActivityIndicator />

@@ -4,6 +4,7 @@ import { Text, View } from "react-native";
 import { Button } from "../button";
 import { IJob } from "dlvrry-common";
 import { Job } from "../../services/job";
+import { User } from "../../services/user";
 import moment from 'moment';
 import { useNavigation } from "@react-navigation/native";
 import { variables } from "../../../Variables";

@@ -18,7 +18,10 @@ export function AuthenticatePaymentScreen(props: any) {
           navigation.goBack();
         } else {
           if (e.url.includes('goback=true')) {
-            CardService.authenticationCompleted.next({ completed: false, message: 'Sonething went wrong. Please make sure the card you have on file is up to date and can accept payments' });
+            CardService.authenticationCompleted.next({
+              completed: false,
+              message: 'Something went wrong. Please make sure the card you have on file is up to date and can accept payments'
+            });
 
             if (inProgress) {
               setInProgress(false);
