@@ -83,7 +83,7 @@ export const Header = (props: HeaderProps) => {
   const goToDashboard = async () => {
     setIsLoading(true);
 
-    const loginLink = await User.getLoginLink(User.storedUser?.id);
+    const loginLink = await User.getLoginLink(User.storedUserId);
 
     setIsLoading(false);
     Linking.openURL(loginLink.data.url);
