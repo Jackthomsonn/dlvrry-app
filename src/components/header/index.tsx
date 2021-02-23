@@ -165,7 +165,7 @@ export const Header = (props: HeaderProps) => {
             {genericActionSheet()}
 
             {
-              User.storedUser && User.storedUser.account_type && User.storedUser.account_type === AccountType.RIDER ? riderActionSheet() : businessActionSheet()
+              User.storedUser?.account_type === AccountType.RIDER ? riderActionSheet() : businessActionSheet()
             }
           </View>
         </ScrollView>

@@ -24,22 +24,22 @@ export function HomeScreen() {
   const navigation = useNavigation();
 
   const [ businessHasConnectedCard, setBusinessHasConnectedCard ] = useState(false);
-  const [ user, userLoading, userError ] = useDocumentData<IUser>(User.getUser(User.storedUserId));
+  const [ user ] = useDocumentData<IUser>(User.getUser(User.storedUserId));
 
   const [ jobsPendingOrCancelled, jobsPendingOrCancelledLoading, jobsPendingOrCancelledError ] = useCollectionData<IJob>(
-    user && user.account_type && user.account_type === AccountType.RIDER
+    user?.account_type === AccountType.RIDER
       ? Job.getJobs([ JobStatus.PENDING, JobStatus.CANCELLED ])
       : Job.getJobsForBusiness(User.storedUserId, [ JobStatus.PENDING, JobStatus.CANCELLED ])
   )
 
   const [ jobsAwaitingPayment, jobsAwaitingPaymentLoading, jobsAwaitingPaymentError ] = useCollectionData<IJob>(
-    user && user.account_type && user.account_type === AccountType.BUSINESS
+    user?.account_type === AccountType.BUSINESS
       ? Job.getJobsForBusiness(User.storedUserId, [ JobStatus.AWAITING_PAYMENT ])
       : undefined
   )
 
   const [ jobsCompleted, jobsCompletedLoading, jobsCompletedError ] = useCollectionData<IJob>(
-    user && user.account_type && user.account_type === AccountType.BUSINESS
+    user?.account_type === AccountType.BUSINESS
       ? Job.getJobsForBusiness(User.storedUserId, [ JobStatus.COMPLETED ])
       : undefined
   )
@@ -60,7 +60,7 @@ export function HomeScreen() {
         <Header main="Available" sub="jobs"></Header>
         <View style={{ padding: 24, flex: 1 }}>
           {
-            jobsPendingOrCancelled && jobsPendingOrCancelled.length > 0
+            jobsPendingOrCancelled?.length > 0
               ? <FlatList showsVerticalScrollIndicator={false} data={jobsPendingOrCancelled} keyExtractor={(_item, index) => index.toString()} renderItem={({ item }) => <JobCard user={user} job={item} account_type={user.account_type} />}></FlatList>
               : <>
                 <View style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}>
@@ -84,7 +84,7 @@ export function HomeScreen() {
         <View style={{
           padding: 24,
           flex: 1,
-          paddingBottom: 214
+          paddingBottom: 214,
         }}>
           <SectionList
             showsHorizontalScrollIndicator={false}
@@ -168,14 +168,14 @@ export function HomeScreen() {
       {
         jobsPendingOrCancelledLoading || jobsAwaitingPaymentLoading || jobsCompletedLoading
           ? <Loader />
-          : user && user.account_type && user.account_type === AccountType.RIDER
+          : user?.account_type === AccountType.RIDER
             ? riderView()
             : businessView()
       }
 
-      <Text>{jobsPendingOrCancelledError ? jobsPendingOrCancelledError : undefined}</Text>
-      <Text>{jobsAwaitingPaymentError ? jobsAwaitingPaymentError : undefined}</Text>
-      <Text>{jobsCompletedError ? jobsCompletedError : undefined}</Text>
+      <Text>{jobsPendingOrCancelledError ?? jobsPendingOrCancelledError}</Text>
+      <Text>{jobsAwaitingPaymentError ?? jobsAwaitingPaymentError}</Text>
+      <Text>{jobsCompletedError ?? jobsCompletedError}</Text>
 
     </SafeAreaView >
   );

@@ -1,4 +1,4 @@
-import { AccountType, IJob, IUser, JobStatus } from 'dlvrry-common';
+import { AccountType, IJob, IUser } from 'dlvrry-common';
 import React, { useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 
@@ -89,7 +89,7 @@ export const JobCard = (props: JobCardProps) => {
               ? <Button
                 type="primary"
                 title="Accept job"
-                onPress={() => acceptJob(props.job.id, props.user?.id)}
+                onPress={() => acceptJob(props.job.id, User.storedUserId)}
                 loading={isLoading} />
               : <JobStatusLabel id={props.job.id} status={props.job.status} cb={cancelJob} isLoading={isLoading} />
           }

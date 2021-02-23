@@ -51,7 +51,7 @@ export const CreateJobScreen = () => {
     setIsSubmitting(true);
 
     try {
-      const response = await Job.createJob(job, user?.id);
+      const response = await Job.createJob(job, User.storedUserId);
 
       if (response.data.completed) {
         setIsSubmitting(false);

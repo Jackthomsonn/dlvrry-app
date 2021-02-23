@@ -6,6 +6,7 @@ import React, { useEffect, useState } from "react";
 
 import Constants from 'expo-constants';
 import MapViewDirections from "react-native-maps-directions"
+import { duration } from 'moment';
 import { variables } from '../../../Variables';
 
 interface MapProps {
@@ -55,28 +56,30 @@ export const Map = (props: MapProps) => {
           width: '100%'
         }}
         camera={{
-          zoom: 30,
+          zoom: 18,
           center: {
             latitude: usersCurrentLocation?.coords.latitude,
-            longitude: usersCurrentLocation?.coords.longitude
+            longitude: usersCurrentLocation?.coords.longitude,
           },
           altitude: usersCurrentLocation?.coords.altitude,
-          pitch: 50,
+          pitch: 0,
           heading: usersCurrentLocation?.coords.heading
         }}
         mapPadding={{ bottom: 150, top: 0, left: 0, right: 0 }}
-        // onUserLocationChange={(e) => {
-        //   map.animateCamera({
-        //     center: {
-        //       latitude: e.nativeEvent.coordinate.latitude,
-        //       longitude: e.nativeEvent.coordinate.longitude
-        //     }
-        //   })
-        // }}
+        onUserLocationChange={(e) => {
+          map.animateCamera({
+            center: {
+              latitude: e.nativeEvent.coordinate.latitude,
+              longitude: e.nativeEvent.coordinate.longitude
+            }
+          }, {
+            duration: 100
+          })
+        }}
         showsPointsOfInterest={false}
+        showsCompass={true}
         loadingEnabled={true}
-        showsUserLocation={true}
-        followsUserLocation={true}>
+        showsUserLocation={true}>
 
         <MapViewDirections
           origin={{

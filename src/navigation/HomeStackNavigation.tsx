@@ -1,5 +1,4 @@
 import { IUser, VerificationStatus } from 'dlvrry-common';
-import React, { useEffect } from 'react';
 
 import { ActivityIndicator } from 'react-native';
 import { AddCardScreen } from '../pages/add-card/AddCard';
@@ -7,6 +6,7 @@ import { AuthenticatePaymentScreen } from '../pages/authenticate-payment/Authent
 import { CreateJobScreen } from '../pages/create-job/CreateJob';
 import { HomeScreen } from '../pages/home/Home';
 import { OnboardingScreen } from '../pages/onboarding/Onboarding';
+import React from 'react';
 import { User } from '../services/user';
 import { createStackNavigator } from '@react-navigation/stack';
 import { useDocumentData } from 'react-firebase-hooks/firestore';
@@ -14,7 +14,7 @@ import { useDocumentData } from 'react-firebase-hooks/firestore';
 const HomeStack = createStackNavigator();
 
 export function HomeStackScreen() {
-  const [ user, userLoading, userError ] = useDocumentData<IUser>(User.getUser(User.storedUserId));
+  const [ user, userLoading ] = useDocumentData<IUser>(User.getUser(User.storedUserId));
 
   const accountIsVerified = () => {
     return (

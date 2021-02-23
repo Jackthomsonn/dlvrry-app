@@ -70,7 +70,7 @@ export function OnboardingScreen() {
     const redirectUri = AuthSession.makeRedirectUri({ useProxy: true });
 
     const response = await User.onboardUser(
-      user?.id,
+      user.id,
       user.email,
       `${ Constants.manifest.extra.functionsUri }/refreshAccountLink`,
       redirectUri
@@ -98,7 +98,7 @@ export function OnboardingScreen() {
 
         break;
       case VerificationStatus.PAST_DUE:
-        const loginLink = await User.getLoginLink(user?.id);
+        const loginLink = await User.getLoginLink(User.storedUserId);
 
         setCheckingForPendingAccountActions(false);
         setAccountHasPendingActions(true);

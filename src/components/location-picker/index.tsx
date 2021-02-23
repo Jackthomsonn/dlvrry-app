@@ -9,11 +9,11 @@ export const LocationPicker = (props: { height: number, onChange: Function }) =>
 
   useEffect(() => {
     setInterval(() => {
-      if (ref && ref.current && ref.current.isFocused()) {
+      if (ref?.current?.isFocused()) {
         setLocationHeight(240)
       }
 
-      if (ref && ref.current && ref.current.isFocused()) {
+      if (ref?.current?.isFocused()) {
         setLocationHeight(240)
       }
     }, 1000);
