@@ -1,6 +1,7 @@
 import { KeyboardTypeOptions, StyleSheet, TextInput, View } from "react-native"
 
 import React from "react"
+import { variables } from "../../../Variables";
 
 const styles = StyleSheet.create({
   input: {
@@ -9,6 +10,7 @@ const styles = StyleSheet.create({
     padding: 12,
     height: 42,
     marginBottom: 12,
+    backgroundColor: variables.light,
     borderColor: 'rgba(0, 0, 0, 0.1)'
   }
 });

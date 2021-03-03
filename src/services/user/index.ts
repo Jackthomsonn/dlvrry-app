@@ -61,18 +61,10 @@ export class User {
   static async getCards(customer_id: string) {
     const token = await firebase.auth().currentUser.getIdToken();
 
-    const response = await Axios.post<any, AxiosResponse<any>>(`${ Constants.manifest.extra.functionsUri }/getPaymentCards`, { customer_id, id: firebase.auth().currentUser.uid }, {
+    return await Axios.post<any, AxiosResponse<any>>(`${ Constants.manifest.extra.functionsUri }/getPaymentCards`, { customer_id, id: firebase.auth().currentUser.uid }, {
       headers: {
         'Authorization': token
       }
     });
-
-    const collection = [];
-
-    response.data.forEach(cards => {
-      collection.push(cards.card.last4);
-    });
-
-    return Promise.resolve(collection);
   }
 }

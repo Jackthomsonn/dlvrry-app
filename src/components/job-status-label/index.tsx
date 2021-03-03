@@ -1,6 +1,5 @@
 import { IJob, JobStatus } from 'dlvrry-common';
 
-import { Button } from "../button";
 import React from 'react';
 import { Text } from 'react-native';
 import { variables } from "../../../Variables";
@@ -26,15 +25,15 @@ export const JobStatusLabel = (props: JobStatusLabelProps) => {
     case JobStatus.IN_PROGRESS:
       element = (
         <>
-          <Text style={{ fontWeight: '700', color: variables.success, marginBottom: 12, textAlign: 'left' }}>In progress</Text>
+          <Text style={{ fontWeight: '700', color: variables.neutral, marginBottom: 12, textAlign: 'left' }}>In progress</Text>
         </>
       )
       break;
     case JobStatus.CANCELLED:
       element = (
         <>
-          <Text style={{ color: variables.light, marginBottom: 12 }}>Cancelled by rider. Job is still awaiting a rider to accept</Text>
-          <Button type="primary" title={'Cancel job'} onPress={() => props.cb(props.id)} loading={props.isLoading} />
+          <Text style={{ fontWeight: '700', color: variables.success, marginBottom: 12, textAlign: 'left' }}>Awaiting acceptance</Text>
+          <Text style={{ color: variables.secondaryColor, marginBottom: 12 }}>This job was cancelled by the rider. This Job is still awaiting a rider to accept</Text>
         </>
       )
       break;
@@ -42,14 +41,13 @@ export const JobStatusLabel = (props: JobStatusLabelProps) => {
       element = (
         <>
           <Text style={{ fontWeight: '700', color: variables.success, marginBottom: 12, textAlign: 'left' }}>Awaiting acceptance</Text>
-          <Button type="primary" title={'Cancel job'} onPress={() => props.cb(props.id)} loading={props.isLoading} />
         </>
       )
       break;
     case JobStatus.REFUNDED:
       element = (
         <>
-          <Text style={{ fontWeight: '700', color: variables.success, marginBottom: 12, textAlign: 'left' }}>Refunded</Text>
+          <Text style={{ fontWeight: '700', color: variables.warning, marginBottom: 12, textAlign: 'left' }}>Refunded</Text>
         </>
       )
       break;

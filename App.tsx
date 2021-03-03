@@ -8,7 +8,6 @@ import { decode, encode } from 'base-64';
 import { AuthStackScreen } from './src/navigation/AuthStackNavigation';
 import Constants from 'expo-constants';
 import { HomeStackScreen } from './src/navigation/HomeStackNavigation';
-import { IUser } from 'dlvrry-common';
 import { NavigationContainer } from '@react-navigation/native';
 import { RiderScreen } from './src/pages/rider/Rider';
 import { SplashScreen } from './src/pages/splash/Splash';

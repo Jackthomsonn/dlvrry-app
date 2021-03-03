@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 
 import { Button } from "../button";
+import { Ionicons } from '@expo/vector-icons';
 import { Job } from '../../services/job';
 import { JobStatusLabel } from '../job-status-label';
 import { User } from '../../services/user';
@@ -11,10 +12,16 @@ import { variables } from "../../../Variables";
 
 const styles = StyleSheet.create({
   host: {
-    backgroundColor: variables.secondaryColor,
+    backgroundColor: variables.light,
+    borderColor: variables.tertiaryColor,
+    shadowColor: variables.tertiaryColor,
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 1,
+    shadowRadius: 2,
+    borderWidth: 1,
     padding: 24,
     flex: 1,
-    marginTop: 20,
+    marginTop: 16,
     borderRadius: 12,
     display: 'flex',
     flexDirection: 'row',
@@ -23,6 +30,11 @@ const styles = StyleSheet.create({
   column: {
     flexDirection: 'column',
     justifyContent: 'space-between'
+  },
+  row: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center'
   }
 })
 
@@ -80,19 +92,31 @@ export const JobCard = (props: JobCardProps) => {
   return (
     <View style={styles.host} >
       <View style={styles.column}>
-        <Text style={{ fontWeight: '700', fontSize: 22, color: variables.light }}>{props.job.owner_name}</Text>
-        <Text style={{ fontWeight: '500', marginTop: 8, fontSize: 18, color: variables.light }}>Location name </Text>
-        <Text style={{ fontWeight: '500', marginTop: 8, fontSize: 18, color: variables.light }}>£{(props.job.payout / 100).toFixed(2)} </Text>
-        <View style={{ width: 300 - 24, marginTop: 12 }}>
-          {
-            props.account_type === AccountType.RIDER
-              ? <Button
-                type="primary"
-                title="Accept job"
-                onPress={() => acceptJob(props.job.id, User.storedUserId)}
-                loading={isLoading} />
-              : <JobStatusLabel id={props.job.id} status={props.job.status} cb={cancelJob} isLoading={isLoading} />
-          }
+        <View style={styles.column}>
+          <>
+            <View style={{ display: 'flex', flexDirection: 'row' }}>
+              <Ionicons name="ios-pin" size={18} color={variables.primaryColor} style={{ marginRight: 12 }} />
+              <Text style={{ fontWeight: '500', fontSize: 18, ...variables.fontStyle, marginBottom: 24, marginRight: 12, color: variables.secondaryColor }}>{props.job.customer_location_name}</Text>
+            </View>
+          </>
+          <View style={{ display: 'flex', flexDirection: 'row', marginBottom: 12 }}>
+            <Ionicons name="ios-cash" size={18} color={variables.primaryColor} style={{ marginRight: 12 }} />
+            <Text style={{ fontWeight: '500', fontSize: 18, ...variables.fontStyle, color: variables.secondaryColor }}>£{(props.job.payout / 100).toFixed(2)} </Text>
+          </View>
+        </View>
+        <View>
+          <View style={{ width: 300 - 24, marginTop: 12 }}>
+            {
+              props.account_type === AccountType.RIDER
+                ? <Button
+                  showIcon={true}
+                  type="primary"
+                  title="Accept job"
+                  onPress={() => acceptJob(props.job.id, User.storedUserId)}
+                  loading={isLoading} />
+                : <JobStatusLabel id={props.job.id} status={props.job.status} cb={cancelJob} isLoading={isLoading} />
+            }
+          </View>
         </View>
       </View>
     </View>

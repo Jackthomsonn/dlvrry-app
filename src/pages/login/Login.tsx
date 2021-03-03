@@ -13,7 +13,7 @@ import { variables } from '../../../Variables';
 const styles = StyleSheet.create({
   host: {
     flex: 1,
-    backgroundColor: '#FFF'
+    backgroundColor: variables.pageBackgroundColor
   },
   input: {
     borderWidth: 1,
@@ -88,7 +88,7 @@ export function LoginScreen() {
             : undefined
         }
 
-        <Button type="primary" title="Login" onPress={handleSubmit(onSubmit)} loading={isLoading}></Button>
+        <Button showIcon={true} type="primary" title="Login" onPress={handleSubmit(onSubmit)} loading={isLoading}></Button>
       </KeyboardAvoidingView>
     </SafeAreaView >
   );

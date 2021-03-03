@@ -1,7 +1,7 @@
 import * as AuthSession from 'expo-auth-session';
 
+import { AccountType, IUser, VerificationStatus } from 'dlvrry-common';
 import { ActivityIndicator, Linking, SafeAreaView, StyleSheet, Text, View } from 'react-native';
-import { IUser, VerificationStatus } from 'dlvrry-common';
 import React, { useEffect, useState } from 'react';
 
 import { Button } from "../../components/button";
@@ -15,18 +15,20 @@ import { variables } from "../../../Variables";
 const styles = StyleSheet.create({
   host: {
     flex: 1,
-    backgroundColor: '#FFF',
+    backgroundColor: variables.pageBackgroundColor,
     justifyContent: 'center'
   },
   primaryText: {
-    color: variables.dark,
+    color: variables.secondaryColor,
     fontWeight: '700',
-    fontSize: 32
+    fontSize: 32,
+    ...variables.fontStyle
   },
   secondaryText: {
-    color: variables.dark,
+    color: variables.secondaryColor,
     fontWeight: '300',
-    fontSize: 32
+    fontSize: 32,
+    ...variables.fontStyle
   },
   verifyHost: {
     flex: 1,
@@ -42,7 +44,8 @@ const styles = StyleSheet.create({
   text: {
     color: variables.light,
     fontWeight: '500',
-    fontSize: 18
+    fontSize: 18,
+    ...variables.fontStyle
   },
   loginLinkHost: {
     marginTop: 12
@@ -92,6 +95,12 @@ export function OnboardingScreen() {
   }
 
   const handleUserVerificationStatus = async () => {
+    if (user?.account_type === AccountType.BUSINESS) {
+      navigation.navigate('Home');
+
+      return;
+    }
+
     switch (user?.verification_status) {
       case VerificationStatus.PENDING_VERIFICATION:
         setCheckingForPendingAccountActions(true);
@@ -131,6 +140,7 @@ export function OnboardingScreen() {
               loginLink
                 ? <>
                   <Button
+                    showIcon={true}
                     type={'secondary'}
                     onPress={() => Linking.openURL(loginLink)}
                     title="Complete onboarding" />

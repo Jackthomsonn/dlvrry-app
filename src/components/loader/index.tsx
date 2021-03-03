@@ -1,6 +1,7 @@
 import { ActivityIndicator, Text, View } from "react-native"
 
 import React from "react";
+import { variables } from "../../../Variables";
 
 interface LoaderProps {
   text?: string

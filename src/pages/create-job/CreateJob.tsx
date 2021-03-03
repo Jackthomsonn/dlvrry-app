@@ -1,17 +1,15 @@
-import { IJob, IUser } from "dlvrry-common";
 import { KeyboardAvoidingView, StyleSheet, Text } from "react-native";
 import React, { useEffect, useState } from "react";
 
 import { Button } from "../../components/button";
 import { CardService } from "../../services/card";
 import { Header } from "../../components/header";
+import { IJob } from "dlvrry-common";
 import { Input } from "../../components/input";
 import { Job } from "../../services/job";
-import { Loader } from "../../components/loader";
 import { LocationPicker } from "../../components/location-picker";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { User } from "../../services/user";
-import { useDocumentData } from "react-firebase-hooks/firestore";
 import { useForm } from "react-hook-form";
 import { useNavigation } from "@react-navigation/native";
 import { variables } from "../../../Variables";
@@ -20,7 +18,7 @@ const styles = StyleSheet.create({
   host: {
     display: 'flex',
     flex: 1,
-    backgroundColor: '#FFF'
+    backgroundColor: variables.pageBackgroundColor
   },
   input: {
     borderWidth: 1,
@@ -43,7 +41,6 @@ export const CreateJobScreen = () => {
   const navigation = useNavigation();
 
   const [ isSubmitting, setIsSubmitting ] = useState(false);
-  const [ user ] = useDocumentData<IUser>(User.getUser(User.storedUserId));
 
   const { register, handleSubmit, setValue, errors } = useForm();
 
@@ -91,7 +88,7 @@ export const CreateJobScreen = () => {
       },
       min: {
         message: 'You must enter a minimum amount of £5',
-        value: 5
+        value: 500
       },
       valueAsNumber: true
     });
@@ -163,7 +160,7 @@ export const CreateJobScreen = () => {
 
             {handleError('number_of_items')}
 
-            <Button type="primary" title="Create job" onPress={handleSubmit(onSubmit)} loading={isSubmitting} ></Button>
+            <Button showIcon={true} type="primary" title="Create job" onPress={handleSubmit(onSubmit)} loading={isSubmitting} ></Button>
           </KeyboardAvoidingView>
         }
       </>

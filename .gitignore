@@ -1,3 +1,4 @@
 node_modules
 .expo/
 .vscode/
+end/functions/.runtimeconfig.json

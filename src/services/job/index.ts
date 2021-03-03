@@ -11,11 +11,12 @@ export class Job {
       .firestore()
       .collection('jobs')
       .where('status', 'in', statuses)
-      .where('payment_captured', '==', true);
+      .where('payment_captured', '==', true)
+      .orderBy('created', 'desc');
   }
 
-  static getJobsForBusiness(id: string, statuses: JobStatus[]) {
-    return firebase.firestore().collection('jobs').where('owner_id', '==', id).where('status', 'in', statuses);
+  static getJobsForBusiness(id: string, statuses: JobStatus[], limit: number) {
+    return firebase.firestore().collection('jobs').where('owner_id', '==', id).where('status', 'in', statuses).orderBy('created', 'desc').limitToLast(limit);
   }
 
   static async getJob(id: string) {

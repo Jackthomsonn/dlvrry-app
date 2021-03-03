@@ -1,13 +1,18 @@
-import { AccountType, IUser, VerificationStatus } from 'dlvrry-common';
 import { Linking, Text, View } from 'react-native';
-import React, { createRef, useEffect, useState } from 'react';
+import React, { createRef, useState } from 'react';
 import { ScrollView, TouchableOpacity } from "react-native-gesture-handler";
 
+import { AccountType } from 'dlvrry-common';
 import ActionSheet from 'react-native-actions-sheet';
+import AmexSvg from '../svg/amex';
 import { Button } from '../button';
+import GenericSvg from '../svg/generic';
 import { Ionicons } from '@expo/vector-icons';
 import { Loader } from '../loader';
+import MastercardSvg from '../svg/mastercard';
+import Stripe from 'stripe';
 import { User } from '../../services/user';
+import VisaSvg from '../svg/visa';
 import firebase from 'firebase';
 import { useNavigation } from '@react-navigation/native';
 import { variables } from '../../../Variables';
@@ -32,18 +37,31 @@ export const Header = (props: HeaderProps) => {
   const riderActionSheet = () => {
     return (
       <>
-        <Text style={{ fontSize: 24, marginTop: 24 }}>Dashboard</Text>
+        <Text style={{ fontSize: 24, ...variables.fontStyle, marginTop: 24, lineHeight: 24 }}>Dashboard</Text>
         <View style={{ marginTop: 8 }}>
-          <Button type="primary" title="Go to my dashboard" onPress={() => { goToDashboard() }} loading={isLoading} />
+          <Button showIcon={true} type="primary" title="Go to my dashboard" onPress={() => { goToDashboard() }} loading={isLoading} />
         </View>
       </>
     )
   }
 
+  const getCardBrandImage = (card: Stripe.Card) => {
+    switch (card.brand) {
+      case 'amex':
+        return <AmexSvg width={30} height={30} />;
+      case 'mastercard':
+        return <MastercardSvg width={30} height={30} />;
+      case 'visa':
+        return <VisaSvg width={30} height={30} />;
+      default:
+        return <GenericSvg width={30} height={30} />;
+    }
+  }
+
   const businessActionSheet = () => {
     return (
-      <View>
-        <Text style={{ fontSize: 24, marginTop: 24 }}>Cards</Text>
+      <View style={{ height: 700 }}>
+        <Text style={{ fontSize: 24, ...variables.fontStyle, marginTop: 24, lineHeight: 24 }}>Cards</Text>
         {
           isGettingCards
             ? <Loader />
@@ -51,18 +69,40 @@ export const Header = (props: HeaderProps) => {
               ? <>
                 <Text style={{ marginTop: 8 }}>You have no available cards</Text>
                 <View style={{ marginTop: 8 }}>
-                  <Button type="primary" title="Add card" onPress={() => { setupCard() }} />
+                  <Button showIcon={true} type="primary" title="Add card" onPress={() => { setupCard() }} />
                 </View>
               </>
               : <>
                 {
                   cards?.length
-                    ? <Text style={{ marginTop: 8 }}>You have {cards.length} card available ending in {cards[ 0 ]}</Text>
+                    ? <>
+                      {
+                        cards.map(card => {
+                          return (
+                            <View style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginTop: 12, marginBottom: 12, backgroundColor: variables.tertiaryColor, padding: 16, borderRadius: 4 }}>
+                              <View style={{ flex: 2 }}>{getCardBrandImage(card)}</View>
+                              <Text style={{ flex: 5, ...variables.fontStyle, fontWeight: '600' }} >************{card.last4}</Text>
+                              <View style={{ display: 'flex', flexDirection: 'row', justifyContent: 'flex-end', alignItems: 'center', flex: 3 }}>
+                                {
+                                  card.is_default_payment_method
+                                    ? <TouchableOpacity style={{ backgroundColor: 'rgba(230,52,98, 0.2)', padding: 4, borderRadius: 4 }}>
+                                      <Text style={{ ...variables.fontStyle, color: variables.primaryColor }}>Default</Text>
+                                    </TouchableOpacity>
+                                    : <TouchableOpacity hitSlop={{ top: 10, left: 10, bottom: 10, right: 10 }}>
+                                      <Ionicons name="ios-link" size={18} color={variables.secondaryColor} />
+                                    </TouchableOpacity>
+                                }
+
+                                <TouchableOpacity style={{ marginLeft: 16 }} hitSlop={{ top: 10, left: 10, bottom: 10, right: 10 }}>
+                                  <Ionicons name="ios-trash" size={18} color={variables.secondaryColor} />
+                                </TouchableOpacity>
+                              </View>
+                            </View>
+                          )
+                        })}
+                    </>
                     : <Text>No cards available</Text>
                 }
-                <View style={{ marginTop: 8 }}>
-                  <Button type="primary" title="Remove card" onPress={() => { setupCard(); }} />
-                </View>
               </>
         }
       </View>
@@ -72,9 +112,9 @@ export const Header = (props: HeaderProps) => {
   const genericActionSheet = () => {
     return (
       <>
-        <Text style={{ fontSize: 24 }}>Account settings</Text>
+        <Text style={{ fontSize: 24, ...variables.fontStyle, }}>Account settings</Text>
         <TouchableOpacity hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }} style={{ marginTop: 8 }} onPress={() => logout()}>
-          {isLoggingOut ? <Loader /> : <Text style={{ marginBottom: 8, fontSize: 18 }}>Log out</Text>}
+          {isLoggingOut ? <Loader /> : <Text style={{ marginBottom: 8, fontSize: 18, ...variables.fontStyle }}>Log out</Text>}
         </TouchableOpacity>
       </>
     )
@@ -105,7 +145,7 @@ export const Header = (props: HeaderProps) => {
 
     const response = await User.getCards(User.storedUser.customer_id);
 
-    setCards(response);
+    setCards(response.data);
 
     setIsGettingCards(false);
   }
@@ -137,14 +177,14 @@ export const Header = (props: HeaderProps) => {
           props.showBackButton
             ? <View style={{ flexDirection: 'row', flex: 1 }}>
               <TouchableOpacity hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }} onPress={() => goBack()}>
-                <Ionicons name="md-arrow-back" size={22} color={variables.dark} />
+                <Ionicons name="md-arrow-back" size={22} color={variables.secondaryColor} />
               </TouchableOpacity>
             </View>
             : undefined
         }
         <View style={{ flexDirection: 'row', flex: 5 }}>
-          <Text style={{ color: variables.dark, fontWeight: props.subheader ? '500' : '700', fontSize: props.subheader ? 22 : 32 }}>{props.main}</Text>
-          <Text style={{ color: variables.dark, fontWeight: '300', fontSize: props.subheader ? 22 : 32 }}> {props.sub}</Text>
+          <Text style={{ color: variables.secondaryColor, fontWeight: props.subheader ? '500' : '700', fontSize: props.subheader ? 22 : 32, ...variables.fontStyle, lineHeight: 32, }}>{props.main}</Text>
+          <Text style={{ color: variables.secondaryColor, fontWeight: '300', fontSize: props.subheader ? 22 : 32, ...variables.fontStyle, lineHeight: 32, }}> {props.sub}</Text>
         </View>
         {
           User.storedUser && !props.hideAvatar
@@ -160,9 +200,11 @@ export const Header = (props: HeaderProps) => {
       </View>
 
       <ActionSheet ref={actionSheetRef} headerAlwaysVisible={true} bounceOnOpen={true} gestureEnabled={true} closable={true}>
-        <ScrollView style={{ padding: 24, height: 500 }}>
+        <ScrollView style={{ padding: 24, height: 700 }} showsVerticalScrollIndicator={false}>
           <View style={{ padding: 12 }}>
-            {genericActionSheet()}
+            {
+              genericActionSheet()
+            }
 
             {
               User.storedUser?.account_type === AccountType.RIDER ? riderActionSheet() : businessActionSheet()

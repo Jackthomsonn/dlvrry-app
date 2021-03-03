@@ -1,5 +1,6 @@
-import { Button, Image, SafeAreaView, StyleSheet, Text, View } from 'react-native';
+import { Image, SafeAreaView, StyleSheet, Text, View } from 'react-native';
 
+import { Button } from '../../components/button';
 import React from 'react';
 import { useNavigation } from '@react-navigation/native';
 import { variables } from '../../../Variables';
@@ -8,7 +9,7 @@ const styles = StyleSheet.create({
   host: {
     flex: 1,
     alignItems: 'center',
-    backgroundColor: '#FFF'
+    backgroundColor: variables.pageBackgroundColor
   },
   header: {
     flex: 2,
@@ -28,25 +29,14 @@ const styles = StyleSheet.create({
   contentText: {
     fontSize: 18,
     textAlign: 'center',
-    width: 300
+    width: 300,
+    fontWeight: '500',
+    ...variables.fontStyle
   },
   buttonContainer: {
     flex: 2,
-    display: 'flex'
-  },
-  buttonRider: {
-    borderColor: variables.primaryColor,
-    borderWidth: 1,
-    padding: 4,
-    borderRadius: 4,
-    marginBottom: 12
-  },
-  buttonBusiness: {
-    backgroundColor: variables.primaryColor,
-    borderColor: variables.primaryColor,
-    borderWidth: 1,
-    padding: 4,
-    borderRadius: 4
+    display: 'flex',
+    width: '70%'
   }
 });
 
@@ -59,23 +49,24 @@ export function WelcomeScreen() {
         <Image source={require('../../../assets/icon.png')} style={styles.logo} />
       </View>
       <View style={styles.content}>
-        <Text style={styles.contentText}>The on-demand delivery service that make sure you recieve your items on the same day you ordered them!</Text>
+        <Text style={styles.contentText}>The first environmental friendly, on-demand delivery service ran by the community</Text>
       </View>
       <View style={styles.buttonContainer}>
-        <View style={styles.buttonRider}>
+        <View>
           <Button
+            showIcon={true}
             onPress={() => navigation.navigate('SignUp')}
             title="Get started"
-            color={variables.primaryColor}>
-          </Button>
+            type={'primary'} />
         </View>
 
-        <View style={styles.buttonBusiness}>
+        <View style={{ marginTop: 24 }}>
           <Button
+            showIcon={true}
             onPress={() => navigation.navigate('Login')}
-            title="Already have an account?"
-            color={variables.light}>
-          </Button>
+            title="Login"
+            type={'primaryNoBorder'}
+            iconColor={variables.primaryColor} />
         </View>
       </View>
     </SafeAreaView >
