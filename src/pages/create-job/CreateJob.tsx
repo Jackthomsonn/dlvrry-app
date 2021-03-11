@@ -72,7 +72,7 @@ export const CreateJobScreen = () => {
       }
     } catch (e) {
       setIsSubmitting(false);
-      alert(e);
+      alert(e.message);
     }
   }
 

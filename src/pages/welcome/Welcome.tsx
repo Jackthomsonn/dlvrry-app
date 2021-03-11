@@ -49,7 +49,7 @@ export function WelcomeScreen() {
         <Image source={require('../../../assets/icon.png')} style={styles.logo} />
       </View>
       <View style={styles.content}>
-        <Text style={styles.contentText}>The first environmental friendly, on-demand delivery service ran by the community</Text>
+        <Text style={styles.contentText}>Welcome to Dlvrry! You can sign up as a rider or as a business below, or, if you already have an account, you can login and start working!</Text>
       </View>
       <View style={styles.buttonContainer}>
         <View>

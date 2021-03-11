@@ -142,8 +142,6 @@ export function SignUpScreen() {
                   defaultValue="bike"
                   items={[
                     { label: 'Bike', value: ModeType.BIKE },
-                    { label: 'Car', value: ModeType.CAR, },
-                    { label: 'Moped', value: ModeType.MOPED, }
                   ]}
                   containerStyle={{ height: 40, marginBottom: 12 }}
                   itemStyle={{ justifyContent: 'flex-start' }}

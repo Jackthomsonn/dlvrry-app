@@ -1,5 +1,5 @@
-import { IJob, JobStatus } from 'dlvrry-common';
-
+import { Button } from '../button';
+import { JobStatus } from 'dlvrry-common';
 import React from 'react';
 import { Text } from 'react-native';
 import { variables } from "../../../Variables";
@@ -8,7 +8,8 @@ interface JobStatusLabelProps {
   id: string,
   status: JobStatus,
   cb?: Function,
-  isLoading?: boolean
+  isLoading?: boolean,
+  completePaymentCb?: Function,
 };
 
 export const JobStatusLabel = (props: JobStatusLabelProps) => {
@@ -55,6 +56,7 @@ export const JobStatusLabel = (props: JobStatusLabelProps) => {
       element = (
         <>
           <Text style={{ fontWeight: '700', color: variables.success, marginBottom: 12, textAlign: 'left' }}>Awaiting payment</Text>
+          <Button title="Make payment" onPress={() => props.completePaymentCb()} type="light" />
         </>
       )
       break;

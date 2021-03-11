@@ -34,6 +34,7 @@ export function HomeStackScreen() {
         <HomeStack.Screen name="Onboarding" component={OnboardingScreen} options={{ headerShown: false, gestureEnabled: false }} />
         <HomeStack.Screen name="Home" component={HomeScreen} options={{ headerShown: false, gestureEnabled: false }} />
         <HomeStack.Screen name="AddCard" component={AddCardScreen} options={{ headerShown: false, gestureEnabled: false }} />
+        <HomeStack.Screen name="AuthenticatePayment" component={AuthenticatePaymentScreen} options={{ headerShown: false, gestureEnabled: false }} />
         <HomeStack.Screen name="CreateJob" component={CreateJobScreen} options={{ headerShown: false, gestureEnabled: false }} />
       </HomeStack.Navigator>
     )

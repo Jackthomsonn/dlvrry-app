@@ -1,10 +1,11 @@
 import { AccountType, IJob, IUser, JobStatus } from 'dlvrry-common';
 import { Image, SafeAreaView, SectionList, StyleSheet, Text, View } from 'react-native';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useCollectionData, useDocumentData } from 'react-firebase-hooks/firestore';
 import { useFocusEffect, useNavigation } from "@react-navigation/native";
 
 import { Button } from '../../components/button';
+import { CardService } from '../../services/card';
 import { FlatList } from "react-native-gesture-handler";
 import { Header } from '../../components/header';
 import { Job } from "../../services/job";
@@ -39,6 +40,12 @@ export function HomeScreen() {
       : undefined
   )
 
+  const [ jobsAwaitingPayment, jobsAwaitingPaymentLoading, jobsAwaitingPaymentError ] = useCollectionData<IJob>(
+    user?.account_type === AccountType.BUSINESS
+      ? Job.getJobsForBusiness(User.storedUserId, [ JobStatus.AWAITING_PAYMENT ], 5)
+      : undefined
+  )
+
   const getConnectedCards = async () => {
     if (!user || !user.customer_id) {
       return;
@@ -46,7 +53,7 @@ export function HomeScreen() {
 
     const response = await User.getCards(user.customer_id);
 
-    setBusinessHasConnectedCard(response.length > 0);
+    setBusinessHasConnectedCard(response.data.length > 0);
   }
 
   const riderView = () => {
@@ -80,8 +87,8 @@ export function HomeScreen() {
           <SectionList
             showsHorizontalScrollIndicator={false}
             showsVerticalScrollIndicator={false}
-            renderItem={({ item }) => <JobCard user={user} job={item} account_type={user.account_type} />}
-            keyExtractor={(item, index) => item.id + index}
+            renderItem={({ item, index }) => <JobCard key={index} user={user} job={item} account_type={user.account_type} />}
+            keyExtractor={(item, index) => item.id}
             renderSectionHeader={({ section: { title } }) => (
               <View style={{ backgroundColor: variables.pageBackgroundColor }}>
                 <Header main={title} sub="jobs" hideAvatar={true} subheader={true}></Header>
@@ -90,6 +97,9 @@ export function HomeScreen() {
             sections={[ {
               title: 'Active',
               data: jobsPendingOrCancelled
+            }, {
+              title: 'Awaiting payment',
+              data: jobsAwaitingPayment
             }, {
               title: 'Completed',
               data: jobsCompleted
@@ -136,7 +146,7 @@ export function HomeScreen() {
   return (
     <SafeAreaView style={styles.host}>
       {
-        jobsPendingOrCancelledLoading || jobsCompletedLoading
+        jobsPendingOrCancelledLoading || jobsCompletedLoading || jobsAwaitingPaymentLoading
           ? <Loader />
           : user?.account_type === AccountType.RIDER
             ? riderView()
@@ -145,6 +155,7 @@ export function HomeScreen() {
 
       <Text>{jobsPendingOrCancelledError ?? jobsPendingOrCancelledError}</Text>
       <Text>{jobsCompletedError ?? jobsCompletedError}</Text>
+      <Text>{jobsAwaitingPaymentError ?? jobsAwaitingPaymentError}</Text>
 
     </SafeAreaView >
   );

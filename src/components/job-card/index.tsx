@@ -93,19 +93,22 @@ export const JobCard = (props: JobCardProps) => {
     <View style={styles.host} >
       <View style={styles.column}>
         <View style={styles.column}>
-          <>
-            <View style={{ display: 'flex', flexDirection: 'row' }}>
-              <Ionicons name="ios-pin" size={18} color={variables.primaryColor} style={{ marginRight: 12 }} />
-              <Text style={{ fontWeight: '500', fontSize: 18, ...variables.fontStyle, marginBottom: 24, marginRight: 12, color: variables.secondaryColor }}>{props.job.customer_location_name}</Text>
+          <View style={{ display: 'flex', flexDirection: 'row' }}>
+            <Ionicons name="ios-pin" size={18} color={variables.primaryColor} style={{ marginRight: 12 }} />
+            <Text style={{ fontWeight: '500', fontSize: 18, ...variables.fontStyle, marginBottom: 24, marginRight: 24, color: variables.secondaryColor }}>{props.job.customer_location_name}</Text>
+          </View>
+
+          <View style={{ display: 'flex', flexDirection: 'row' }}>
+            <Ionicons name="ios-barcode" size={18} color={variables.primaryColor} style={{ marginRight: 12 }} />
+            <Text style={{ fontWeight: '500', fontSize: 18, ...variables.fontStyle, marginBottom: 24, marginRight: 0, color: variables.secondaryColor }}>{props.job.id.substr(0, 4).toUpperCase()}</Text>
+            <View style={{ display: 'flex', flexDirection: 'row', marginBottom: 12, marginLeft: 24 }}>
+              <Ionicons name="ios-cash" size={18} color={variables.primaryColor} style={{ marginRight: 12 }} />
+              <Text style={{ fontWeight: '500', fontSize: 18, ...variables.fontStyle, color: variables.secondaryColor }}>£{(props.job.payout / 100).toFixed(2)} </Text>
             </View>
-          </>
-          <View style={{ display: 'flex', flexDirection: 'row', marginBottom: 12 }}>
-            <Ionicons name="ios-cash" size={18} color={variables.primaryColor} style={{ marginRight: 12 }} />
-            <Text style={{ fontWeight: '500', fontSize: 18, ...variables.fontStyle, color: variables.secondaryColor }}>£{(props.job.payout / 100).toFixed(2)} </Text>
           </View>
         </View>
         <View>
-          <View style={{ width: 300 - 24, marginTop: 12 }}>
+          <View style={{ width: 300 - 24 }}>
             {
               props.account_type === AccountType.RIDER
                 ? <Button
@@ -114,7 +117,12 @@ export const JobCard = (props: JobCardProps) => {
                   title="Accept job"
                   onPress={() => acceptJob(props.job.id, User.storedUserId)}
                   loading={isLoading} />
-                : <JobStatusLabel id={props.job.id} status={props.job.status} cb={cancelJob} isLoading={isLoading} />
+                : <JobStatusLabel id={props.job.id} status={props.job.status} cb={cancelJob} isLoading={isLoading} completePaymentCb={() => {
+                  navigation.navigate('AuthenticatePayment', {
+                    client_secret: props.job.complete_payment_link,
+                    payment_method_id: props.job.complete_payment_method_link,
+                  });
+                }} />
             }
           </View>
         </View>

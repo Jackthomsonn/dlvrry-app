@@ -1,30 +1,34 @@
-import * as Location from 'expo-location';
-
+import { IJob, JobStatus } from "dlvrry-common";
 import React, { useState } from "react";
 import { Text, View } from "react-native";
 
 import { Button } from "../button";
-import { IJob } from "dlvrry-common";
 import { Job } from "../../services/job";
-import moment from 'moment';
+import getDirections from 'react-native-google-maps-directions'
 import { useNavigation } from "@react-navigation/native";
 import { variables } from "../../../Variables";
 
 interface InfoProps {
   job: IJob,
-  duration: number
+  duration: number,
 }
 
 export const Info = (props: InfoProps) => {
   const navigation = useNavigation();
   const [ isCancellingJob, setIsCancellingJob ] = useState(false);
   const [ isCompletingJob, setIsCompletingJob ] = useState(false);
+  const [ currentProgress, setCurrentProgress ] = useState('in_progress');
 
   const cancelJob = async () => {
     try {
       setIsCancellingJob(true);
+
       await Job.cancelJob(props.job.id);
+
       setIsCancellingJob(false);
+
+      setCurrentProgress('in_progress');
+
       navigation.goBack();
     } catch (e) {
       setIsCancellingJob(false);
@@ -40,11 +44,47 @@ export const Info = (props: InfoProps) => {
 
       setIsCompletingJob(false);
 
+      setCurrentProgress('in_progress');
+
       navigation.goBack();
     } catch (e) {
       setIsCompletingJob(false);
+
+      setCurrentProgress('in_progress');
+
       alert(e);
+
+      navigation.goBack();
     }
+  }
+
+  const openDirectionsViewer = async () => {
+    const data = {
+      destination: {
+        latitude: props.job.customer_location.latitude,
+        longitude: props.job.customer_location.longitude,
+      },
+      params: [
+        {
+          key: "travelmode",
+          value: "bicycling"
+        },
+        {
+          key: "dir_action",
+          value: "navigate"
+        }
+      ],
+      waypoints: [
+        {
+          latitude: props.job.pickup_location.latitude,
+          longitude: props.job.pickup_location.longitude,
+        },
+      ]
+    }
+
+    getDirections(data);
+
+    setCurrentProgress('get_directions');
   }
 
   return (
@@ -84,14 +124,18 @@ export const Info = (props: InfoProps) => {
             <Text style={{ fontWeight: '700', color: variables.secondaryColor, fontSize: 18, ...variables.fontStyle }}>{props.job.number_of_items}</Text>
           </View>
           <View style={{ borderTopRightRadius: 50, width: '50%', justifyContent: 'center', alignItems: 'center' }}>
-            <Text style={{ fontWeight: '500', color: variables.primaryColor, fontSize: 16, ...variables.fontStyle }}>ETA</Text>
-            <Text style={{ fontWeight: '700', color: variables.secondaryColor, fontSize: 18, ...variables.fontStyle }}>{props.duration ? moment().add(props.duration, 'minutes').format('HH:MM') : <Text>Calculating</Text>}</Text>
+            <Text style={{ fontWeight: '500', color: variables.primaryColor, fontSize: 16, ...variables.fontStyle }}>Job ID</Text>
+            <Text style={{ fontWeight: '700', color: variables.secondaryColor, fontSize: 18, ...variables.fontStyle }}>{props.job.id.substr(0, 4).toUpperCase()}</Text>
           </View>
         </View>
 
         <View style={{ height: 140, backgroundColor: variables.light, justifyContent: 'center', alignItems: 'center' }}>
           <View style={{ width: '80%' }}>
-            <Button showIcon={true} title={'Complete job'} onPress={() => completeJob()} type={'primary'} loading={isCompletingJob} />
+            {
+              currentProgress === JobStatus.IN_PROGRESS
+                ? <Button showIcon={true} title={'Get directions'} onPress={() => openDirectionsViewer()} type={'primary'} loading={isCompletingJob} />
+                : <Button showIcon={true} title={'Complete job'} onPress={() => completeJob()} type={'primary'} loading={isCompletingJob} />
+            }
             <View style={{ justifyContent: 'center', alignItems: 'center', marginBottom: 24 }}>
               <Button showIcon={true} title={'Cancel job'} onPress={() => cancelJob()} type='link' loading={isCancellingJob} loaderColor={variables.secondaryColor} />
             </View>

@@ -1,15 +1,19 @@
+import ActionSheet, {
+  addHasReachedTopListener,
+  removeHasReachedTopListener,
+} from 'react-native-actions-sheet';
 import { Linking, Text, View } from 'react-native';
-import React, { createRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { ScrollView, TouchableOpacity } from "react-native-gesture-handler";
 
 import { AccountType } from 'dlvrry-common';
-import ActionSheet from 'react-native-actions-sheet';
 import AmexSvg from '../svg/amex';
 import { Button } from '../button';
 import GenericSvg from '../svg/generic';
 import { Ionicons } from '@expo/vector-icons';
 import { Loader } from '../loader';
 import MastercardSvg from '../svg/mastercard';
+import { Payment } from '../../services/payment';
 import Stripe from 'stripe';
 import { User } from '../../services/user';
 import VisaSvg from '../svg/visa';
@@ -26,20 +30,48 @@ interface HeaderProps {
 }
 
 export const Header = (props: HeaderProps) => {
-  const [ cards, setCards ] = useState(undefined);
+  const [ paymentMethods, setPaymentMethods ] = useState(undefined);
   const [ isLoading, setIsLoading ] = useState(false);
-  const [ isLoggingOut, setIsLoggingOut ] = useState(false);
   const [ isGettingCards, setIsGettingCards ] = useState(false);
 
-  const actionSheetRef: any = createRef();
+  const actionSheetRef: React.MutableRefObject<any> = useRef();
+  const scrollViewRef: React.MutableRefObject<any> = useRef();
   const navigation = useNavigation();
+
+  useEffect(() => {
+    addHasReachedTopListener(onHasReachedTop);
+    return () => {
+      removeHasReachedTopListener(onHasReachedTop);
+    };
+  }, []);
+
+  const onHasReachedTop = hasReachedTop => {
+    if (hasReachedTop)
+      scrollViewRef.current?.setNativeProps({
+        scrollEnabled: hasReachedTop,
+      });
+  };
+
+  const onClose = () => {
+    scrollViewRef.current?.setNativeProps({
+      scrollEnabled: false,
+    });
+  };
+
+  const onOpen = () => {
+    scrollViewRef.current?.setNativeProps({
+      scrollEnabled: false,
+    });
+  };
 
   const riderActionSheet = () => {
     return (
       <>
-        <Text style={{ fontSize: 24, ...variables.fontStyle, marginTop: 24, lineHeight: 24 }}>Dashboard</Text>
-        <View style={{ marginTop: 8 }}>
-          <Button showIcon={true} type="primary" title="Go to my dashboard" onPress={() => { goToDashboard() }} loading={isLoading} />
+        <View style={{ paddingBottom: 200 }}>
+          <Text style={{ fontSize: 24, ...variables.fontStyle, marginTop: 24, lineHeight: 24 }}>Dashboard</Text>
+          <View style={{ marginTop: 8 }}>
+            <Button showIcon={true} type="primary" title="Go to my dashboard" onPress={() => { goToDashboard() }} loading={isLoading} />
+          </View>
         </View>
       </>
     )
@@ -58,14 +90,24 @@ export const Header = (props: HeaderProps) => {
     }
   }
 
+  const removePaymentMethod = async (payment_method_id: string) => {
+    try {
+      await Payment.removePaymentMethod(payment_method_id);
+      await getCards();
+    } catch (e) {
+      alert(e);
+    }
+  }
+
   const businessActionSheet = () => {
     return (
-      <View style={{ height: 700 }}>
+      <View style={{ paddingBottom: 48 }}>
+        <View style={{ backgroundColor: variables.tertiaryColor, height: 1, marginTop: 8 }}></View>
         <Text style={{ fontSize: 24, ...variables.fontStyle, marginTop: 24, lineHeight: 24 }}>Cards</Text>
         {
           isGettingCards
             ? <Loader />
-            : cards?.length === 0
+            : paymentMethods?.length === 0
               ? <>
                 <Text style={{ marginTop: 8 }}>You have no available cards</Text>
                 <View style={{ marginTop: 8 }}>
@@ -74,26 +116,26 @@ export const Header = (props: HeaderProps) => {
               </>
               : <>
                 {
-                  cards?.length
+                  paymentMethods?.length
                     ? <>
                       {
-                        cards.map(card => {
+                        paymentMethods.map((payment_method, index) => {
                           return (
-                            <View style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginTop: 12, marginBottom: 12, backgroundColor: variables.tertiaryColor, padding: 16, borderRadius: 4 }}>
-                              <View style={{ flex: 2 }}>{getCardBrandImage(card)}</View>
-                              <Text style={{ flex: 5, ...variables.fontStyle, fontWeight: '600' }} >************{card.last4}</Text>
-                              <View style={{ display: 'flex', flexDirection: 'row', justifyContent: 'flex-end', alignItems: 'center', flex: 3 }}>
+                            <View key={index} style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginTop: 12, marginBottom: 12, backgroundColor: variables.tertiaryColor, padding: 16, borderRadius: 4 }}>
+                              <View style={{ flex: 2 }}>{getCardBrandImage(payment_method)}</View>
+                              <Text style={{ flex: 5, ...variables.fontStyle, fontWeight: '600' }} >************{payment_method.last4}</Text>
+                              <View style={{ display: 'flex', flexDirection: 'row', justifyContent: 'flex-end', alignItems: 'center', flex: 4 }}>
                                 {
-                                  card.is_default_payment_method
-                                    ? <TouchableOpacity style={{ backgroundColor: 'rgba(230,52,98, 0.2)', padding: 4, borderRadius: 4 }}>
-                                      <Text style={{ ...variables.fontStyle, color: variables.primaryColor }}>Default</Text>
+                                  payment_method.is_default_payment_method
+                                    ? <TouchableOpacity style={{ backgroundColor: 'rgba(61, 220, 151, 0.2)', padding: 4, borderRadius: 4 }}>
+                                      <Text style={{ ...variables.fontStyle, fontWeight: '500', color: variables.success }}>Default</Text>
                                     </TouchableOpacity>
-                                    : <TouchableOpacity hitSlop={{ top: 10, left: 10, bottom: 10, right: 10 }}>
-                                      <Ionicons name="ios-link" size={18} color={variables.secondaryColor} />
+                                    : <TouchableOpacity style={{ backgroundColor: 'rgba(63, 48, 71, 0.1)', padding: 4, borderRadius: 4 }}>
+                                      <Text style={{ ...variables.fontStyle, fontWeight: '500', color: variables.secondaryColor }}>Set default</Text>
                                     </TouchableOpacity>
                                 }
 
-                                <TouchableOpacity style={{ marginLeft: 16 }} hitSlop={{ top: 10, left: 10, bottom: 10, right: 10 }}>
+                                <TouchableOpacity style={{ marginLeft: 16 }} hitSlop={{ top: 10, left: 10, bottom: 10, right: 10 }} onPress={() => removePaymentMethod(payment_method.id)}>
                                   <Ionicons name="ios-trash" size={18} color={variables.secondaryColor} />
                                 </TouchableOpacity>
                               </View>
@@ -112,9 +154,9 @@ export const Header = (props: HeaderProps) => {
   const genericActionSheet = () => {
     return (
       <>
-        <Text style={{ fontSize: 24, ...variables.fontStyle, }}>Account settings</Text>
+        <Text style={{ fontSize: 24, ...variables.fontStyle }}>Account settings</Text>
         <TouchableOpacity hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }} style={{ marginTop: 8 }} onPress={() => logout()}>
-          {isLoggingOut ? <Loader /> : <Text style={{ marginBottom: 8, fontSize: 18, ...variables.fontStyle }}>Log out</Text>}
+          <Text style={{ marginBottom: 8, fontSize: 18, ...variables.fontStyle }}>Log out</Text>
         </TouchableOpacity>
       </>
     )
@@ -130,7 +172,6 @@ export const Header = (props: HeaderProps) => {
   }
 
   const logout = async () => {
-    setIsLoggingOut(true);
     firebase.auth().signOut();
   }
 
@@ -145,7 +186,7 @@ export const Header = (props: HeaderProps) => {
 
     const response = await User.getCards(User.storedUser.customer_id);
 
-    setCards(response.data);
+    setPaymentMethods(response.data);
 
     setIsGettingCards(false);
   }
@@ -199,9 +240,31 @@ export const Header = (props: HeaderProps) => {
         }
       </View>
 
-      <ActionSheet ref={actionSheetRef} headerAlwaysVisible={true} bounceOnOpen={true} gestureEnabled={true} closable={true}>
-        <ScrollView style={{ padding: 24, height: 700 }} showsVerticalScrollIndicator={false}>
-          <View style={{ padding: 12 }}>
+      <ActionSheet
+        initialOffsetFromBottom={0.6}
+        ref={actionSheetRef}
+        onOpen={onOpen}
+        statusBarTranslucent
+        bounceOnOpen={true}
+        bounciness={4}
+        gestureEnabled={true}
+        onClose={onClose}
+        defaultOverlayOpacity={0.2}>
+        <ScrollView
+          style={{ padding: 24 }}
+          showsVerticalScrollIndicator={false} ref={scrollViewRef}
+          nestedScrollEnabled={true}
+          onScrollEndDrag={() =>
+            actionSheetRef.current?.handleChildScrollEnd()
+          }
+          onScrollAnimationEnd={() =>
+            actionSheetRef.current?.handleChildScrollEnd()
+          }
+          onMomentumScrollEnd={() =>
+            actionSheetRef.current?.handleChildScrollEnd()
+          }
+        >
+          <View style={{ padding: 12, paddingBottom: 140 }}>
             {
               genericActionSheet()
             }

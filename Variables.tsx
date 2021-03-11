@@ -1,7 +1,7 @@
 export const variables = {
   primaryColor: '#E63462',
   secondaryColor: '#3F3047',
-  tertiaryColor: '#F2F4F3',
+  tertiaryColor: '#F9F9F9',
 
   light: '#FFF',
 
@@ -12,7 +12,7 @@ export const variables = {
   disabledColor: '#F5F5F5',
   disabledTextColor: '#DDD',
 
-  pageBackgroundColor: '#F6F7F9',
+  pageBackgroundColor: '#FFF',
 
   fontStyle: {
     lineHeight: 22,

@@ -17,7 +17,7 @@ interface MapProps {
     latitude: number,
     longitude: number
   },
-  duration: Function
+  duration: Function,
 }
 
 export const Map = (props: MapProps) => {
@@ -44,31 +44,6 @@ export const Map = (props: MapProps) => {
     setIsReady(true);
   }
 
-  const degreeToRadians = (latLong: any) => {
-    return (Math.PI * latLong / 180.0);
-  }
-
-  const radiansToDegree = (latLong: any) => {
-    return (latLong * 180.0 / Math.PI);
-  }
-
-  const getBearing = (originLat: number, originLng: number, destinationLat: number, destinationLng: number) => {
-    const fLat = degreeToRadians(originLat);
-    const fLong = degreeToRadians(originLng);
-    const tLat = degreeToRadians(destinationLat);
-    const tLong = degreeToRadians(destinationLng);
-
-    const dLon = (tLong - fLong);
-
-    const degree = radiansToDegree(
-      Math.atan2(Math.sin(dLon) * Math.cos(tLat), Math.cos(fLat) * Math.sin(tLat) - Math.sin(fLat) * Math.cos(tLat) * Math.cos(dLon))
-    );
-
-    if (degree >= 0) return degree;
-
-    return 360 + degree;
-  }
-
   return (
     isReady
       ? <MapView
@@ -80,30 +55,16 @@ export const Map = (props: MapProps) => {
           width: '100%'
         }}
         camera={{
-          zoom: 100,
+          zoom: 12,
           center: {
             latitude: usersCurrentLocation?.coords.latitude,
             longitude: usersCurrentLocation?.coords.longitude,
           },
           altitude: usersCurrentLocation?.coords.altitude,
           pitch: 80,
-          heading: getBearing(props.customerAddress.latitude, props.customerAddress.longitude, usersCurrentLocation?.coords.latitude, usersCurrentLocation?.coords.longitude)
+          heading: usersCurrentLocation.coords.heading
         }}
         mapPadding={{ bottom: 150, top: 0, left: 0, right: 0 }}
-        onUserLocationChange={(e) => {
-          map.animateCamera({
-            zoom: 100,
-            center: {
-              latitude: e.nativeEvent.coordinate.latitude,
-              longitude: e.nativeEvent.coordinate.longitude,
-            },
-            altitude: e.nativeEvent.coordinate.altitude,
-            pitch: 80,
-            heading: getBearing(props.customerAddress.latitude, props.customerAddress.longitude, usersCurrentLocation?.coords.latitude, usersCurrentLocation?.coords.longitude),
-          }, {
-            duration: 100
-          })
-        }}
         showsPointsOfInterest={false}
         showsCompass={true}
         loadingEnabled={true}
@@ -122,10 +83,7 @@ export const Map = (props: MapProps) => {
           apikey={Constants.manifest.extra.apiKey}
           strokeWidth={3}
           strokeColor={variables.primaryColor}
-          precision={'high'}
-          onReady={result => {
-            props.duration(result.duration);
-          }}
+          precision={'low'}
         />
         <Marker coordinate={{ latitude: props.pickupAddress.latitude, longitude: props.pickupAddress.longitude }} title={'Pickup location'}></Marker>
         <Marker coordinate={{ latitude: props.customerAddress.latitude, longitude: props.customerAddress.longitude }} title={'Customer location'}></Marker>

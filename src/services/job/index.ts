@@ -2,7 +2,6 @@ import Axios, { AxiosResponse } from 'axios';
 import { IJob, JobStatus } from 'dlvrry-common';
 
 import Constants from 'expo-constants';
-import { User } from './../user/index';
 import firebase from 'firebase';
 
 export class Job {
