@@ -43,7 +43,7 @@ export function HomeStackScreen() {
   return (
     userLoading || !user
       ? <ActivityIndicator />
-      : user.verification_status === VerificationStatus.COMPLETED
+      : user.verification_status === VerificationStatus.COMPLETE
         ? accountIsVerified()
         : accountIsNotVerified()
   );

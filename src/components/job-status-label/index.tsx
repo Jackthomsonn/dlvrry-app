@@ -30,7 +30,7 @@ export const JobStatusLabel = (props: JobStatusLabelProps) => {
         </>
       )
       break;
-    case JobStatus.CANCELLED:
+    case JobStatus.CANCELLED_BY_RIDER:
       element = (
         <>
           <Text style={{ fontWeight: '700', color: variables.success, marginBottom: 12, textAlign: 'left' }}>Awaiting acceptance</Text>

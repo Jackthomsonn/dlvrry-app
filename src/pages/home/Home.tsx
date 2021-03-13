@@ -30,8 +30,8 @@ export function HomeScreen() {
 
   const [ jobsPendingOrCancelled, jobsPendingOrCancelledLoading, jobsPendingOrCancelledError ] = useCollectionData<IJob>(
     user?.account_type === AccountType.RIDER
-      ? Job.getJobs([ JobStatus.PENDING, JobStatus.CANCELLED ])
-      : Job.getJobsForBusiness(User.storedUserId, [ JobStatus.PENDING, JobStatus.CANCELLED, JobStatus.IN_PROGRESS ], 100)
+      ? Job.getJobs([ JobStatus.PENDING, JobStatus.CANCELLED_BY_RIDER ])
+      : Job.getJobsForBusiness(User.storedUserId, [ JobStatus.PENDING, JobStatus.CANCELLED_BY_RIDER, JobStatus.IN_PROGRESS ], 100)
   )
 
   const [ jobsCompleted, jobsCompletedLoading, jobsCompletedError ] = useCollectionData<IJob>(

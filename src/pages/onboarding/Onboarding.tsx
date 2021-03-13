@@ -119,7 +119,7 @@ export function OnboardingScreen() {
         startOnboardingProcess();
 
         break;
-      case VerificationStatus.COMPLETED:
+      case VerificationStatus.COMPLETE:
         navigation.navigate('Home');
         break;
     }

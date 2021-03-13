@@ -1,13 +1,13 @@
-import { AccountType, ModeType } from 'dlvrry-common';
+import { AccountType, ModeType, VerificationStatus } from 'dlvrry-common';
 import { KeyboardAvoidingView, StyleSheet, Text, View } from 'react-native';
 import React, { useEffect, useState } from 'react';
-import { ScrollView, TextInput } from 'react-native-gesture-handler';
 
 import { Button } from '../../components/button';
 import DropDownPicker from 'react-native-dropdown-picker';
 import { Header } from '../../components/header';
 import { Input } from '../../components/input';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { ScrollView } from 'react-native-gesture-handler';
 import { User } from '../../services/user';
 import firebase from 'firebase';
 import { useForm } from 'react-hook-form';
@@ -71,6 +71,10 @@ export function SignUpScreen() {
     setValue('account_type', AccountType.RIDER);
 
     setValue('mode', ModeType.BIKE);
+
+    return () => {
+
+    }
   }, [ register ])
 
   const onSubmit = async () => {
@@ -82,12 +86,29 @@ export function SignUpScreen() {
         getValues('password')
       );
 
-      await User.updateUser(result.user.uid, {
-        account_type: getValues('account_type'),
+      const account_type = getValues('account_type');
+
+      const generic_update_object = {
+        account_type: account_type,
         id: result.user.uid,
         name: getValues('name'),
-        mode: getValues('mode')
-      });
+      }
+
+      const rider_update_object = {
+        mode: getValues('mode'),
+        verification_status: VerificationStatus.PENDING,
+      }
+
+      if (account_type === AccountType.RIDER) {
+        await User.updateUser(result.user.uid, {
+          ...generic_update_object,
+          ...rider_update_object,
+        });
+      } else {
+        await User.updateUser(result.user.uid, {
+          ...generic_update_object,
+        });
+      }
 
       User.authenticated.next(result.user);
 
