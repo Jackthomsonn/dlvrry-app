@@ -10,7 +10,7 @@ export function AddCardScreen(props: any) {
   return (
     <WebView
       originWhitelist={[ '*' ]}
-      source={{ uri: `https://payment.dlvrry.io?customer_id=${ props.route.params.customer_id }` }}
+      source={{ uri: `https://web-build-taupe.vercel.app?customer_id=${ props.route.params.customer_id }` }}
       onNavigationStateChange={async (e) => {
         if (e.url.includes('success=true')) {
           navigation.goBack();

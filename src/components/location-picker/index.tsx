@@ -71,7 +71,7 @@ export const LocationPicker = (props: { height: number, onChange: Function }) =>
               location: currentLocation,
               radius: '8100',
               strictbounds: true,
-              key: 'AIzaSyBcQkaIwOQN0mbW8aUhjXIVz2q22cywbbU',
+              key: 'AIzaSyCGDPRUz_vTChg2QDg-qMRlhxz7hGVlFFs',
               sessiontoken: new Date().valueOf(),
               language: 'en'
             }}
