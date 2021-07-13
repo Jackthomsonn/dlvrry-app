@@ -2,6 +2,7 @@
   "main": "node_modules/expo/AppEntry.js",
   "scripts": {
     "start": "npm run env:dev && expo start",
+    "start-prod": "npm run env:prod && expo start",
     "eject": "expo eject",
     "generate": "node generator/index",
     "env:dev": "expo-env --env=development",
@@ -51,7 +52,8 @@
     "rxjs": "^6.6.3",
     "stripe": "^8.131.1",
     "stripe-client": "^1.1.5",
-    "uuid": "^8.3.2"
+    "uuid": "^8.3.2",
+    "expo-notifications": "~0.7.2"
   },
   "devDependencies": {
     "@babel/core": "^7.0.0",

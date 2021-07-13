@@ -2,15 +2,20 @@ import React, { useState } from 'react';
 
 import { WebView } from 'react-native-webview';
 import { useNavigation } from "@react-navigation/native";
+import Constants from 'expo-constants';
 
 export function AddCardScreen(props: any) {
   const navigation = useNavigation();
   const [ inProgress, setInProgress ] = useState(true);
 
+  const url = Constants.manifest.extra.useEmulator
+    ? 'https://dlvrry-payment-hgwx8lxfr-jackthomson.vercel.app'
+    : 'https://payment.dlvrry.io'
+
   return (
     <WebView
       originWhitelist={[ '*' ]}
-      source={{ uri: `https://web-build-taupe.vercel.app?customer_id=${ props.route.params.customer_id }` }}
+      source={{ uri: `${url}?customer_id=${ props.route.params.customer_id }` }}
       onNavigationStateChange={async (e) => {
         if (e.url.includes('success=true')) {
           navigation.goBack();

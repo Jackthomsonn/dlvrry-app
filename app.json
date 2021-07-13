@@ -2,7 +2,6 @@
   "expo": {
     "name": "Dlvrry",
     "slug": "dlvrry",
-    "privacy": "public",
     "scheme": "dlvrry",
     "platforms": [
       "ios",
@@ -24,7 +23,8 @@
       "**/*"
     ],
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.jackthomson.dlvrry"
     },
     "extra": {
       "functionsUri": "https://dlvrry-functions.ngrok.io/dlvrry-33018/us-central1",

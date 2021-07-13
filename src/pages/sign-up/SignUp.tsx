@@ -99,18 +99,26 @@ export function SignUpScreen() {
         verification_status: VerificationStatus.PENDING,
       }
 
-      if (account_type === AccountType.RIDER) {
-        await User.updateUser(result.user.uid, {
-          ...generic_update_object,
-          ...rider_update_object,
-        });
-      } else {
-        await User.updateUser(result.user.uid, {
-          ...generic_update_object,
-        });
-      }
+      firebase.firestore().collection('users').doc(result.user.uid).onSnapshot(async (user) => {
+        if (user.data().account_type !== AccountType.NONE) {
+          User.authenticated.next(result.user);
 
-      User.authenticated.next(result.user);
+          return;
+        }
+
+        if (account_type === AccountType.RIDER) {
+          await User.updateUser(result.user.uid, {
+            ...generic_update_object,
+            ...rider_update_object,
+          });
+        } else {
+          await User.updateUser(result.user.uid, {
+            ...generic_update_object,
+          });
+        }
+
+        User.authenticated.next(result.user);
+      })
 
       setIsLoading(false);
     } catch (error) {

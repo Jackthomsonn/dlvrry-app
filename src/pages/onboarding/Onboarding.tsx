@@ -68,9 +68,13 @@ export function OnboardingScreen() {
   const [ user ] = useDocumentData<IUser>(User.getUser(User.storedUserId));
 
   const startOnboardingProcess = async () => {
+    console.log('HEY1')
     if (onboardingActionIsInProcess) return;
 
+    console.log('HEY')
     const redirectUri = AuthSession.makeRedirectUri({ useProxy: true });
+
+    console.log(redirectUri)
 
     const response = await User.onboardUser(
       user.id,
@@ -95,6 +99,7 @@ export function OnboardingScreen() {
   }
 
   const handleUserVerificationStatus = async () => {
+    console.log(user)
     if (user?.account_type === AccountType.BUSINESS) {
       navigation.navigate('Home');
 
