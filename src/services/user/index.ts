@@ -67,7 +67,7 @@ export class User {
     try {
       await firebase.firestore().collection("users").doc(id).update(data);
     } catch (e) {
-      console.log("THERE WAS AN ERROR");
+      throw e;
     }
 
     return Promise.resolve();

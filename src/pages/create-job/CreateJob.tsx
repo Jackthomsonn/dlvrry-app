@@ -119,6 +119,9 @@ export const CreateJobScreen = () => {
         value: 1
       }
     });
+    register('phone_number', {
+      required: false
+    });
   }
 
   const handleError = (modelName: string) => {
@@ -159,6 +162,12 @@ export const CreateJobScreen = () => {
             <Input keyboardType={'numbers-and-punctuation'} onChange={value => setValue('number_of_items', value)} />
 
             {handleError('number_of_items')}
+
+            <Text style={{ marginBottom: 8 }}>Customer phone number (For delivery notifications)</Text>
+
+            <Input keyboardType={'number-pad'} onChange={value => setValue('phone_number', value)} />
+
+            {handleError('phone_number')}
 
             <Button showIcon={true} type="primary" title="Create job" onPress={handleSubmit(onSubmit)} loading={isSubmitting} ></Button>
           </KeyboardAvoidingView>

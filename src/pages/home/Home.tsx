@@ -1,11 +1,11 @@
 import { AccountType, IJob, IUser, JobStatus } from 'dlvrry-common';
-import { Image, SafeAreaView, SectionList, StyleSheet, Text, View } from 'react-native';
-import React, { useEffect, useState } from 'react';
+import {  Platform, SafeAreaView, SectionList, StyleSheet, Text, View } from 'react-native';
+import React, {  useState } from 'react';
 import { useCollectionData, useDocumentData } from 'react-firebase-hooks/firestore';
 import { useFocusEffect, useNavigation } from "@react-navigation/native";
 
+import Constants from 'expo-constants';
 import { Button } from '../../components/button';
-import { CardService } from '../../services/card';
 import { FlatList } from "react-native-gesture-handler";
 import { Header } from '../../components/header';
 import { Job } from "../../services/job";
@@ -14,6 +14,8 @@ import { Loader } from '../../components/loader';
 import NoResultsSvg from '../../components/svg/no-results';
 import { User } from "../../services/user";
 import { variables } from '../../../Variables';
+
+import * as Notifications from 'expo-notifications';
 
 const styles = StyleSheet.create({
   host: {
@@ -139,8 +141,46 @@ export function HomeScreen() {
     )
   }
 
+  const registerForPushNotificationsAsync = async () =>{
+    let token: string;
+
+    if (Constants.isDevice) {
+      const { status: existingStatus } = await Notifications.getPermissionsAsync();
+
+      let finalStatus = existingStatus;
+      if (existingStatus !== 'granted') {
+        const { status } = await Notifications.requestPermissionsAsync();
+        finalStatus = status;
+      }
+      if (finalStatus !== 'granted') {
+        return;
+      }
+
+      token = (await Notifications.getExpoPushTokenAsync()).data;
+    } else {
+      alert('Must use physical device for Push Notifications');
+    }
+  
+    if (Platform.OS === 'android') {
+      Notifications.setNotificationChannelAsync('default', {
+        name: 'default',
+        importance: Notifications.AndroidImportance.MAX,
+        vibrationPattern: [0, 250, 250, 250],
+        lightColor: '#FF231F7C',
+      });
+    }
+  
+    return token;
+  }
+
   useFocusEffect(() => {
     getConnectedCards();
+
+    Notifications.getPermissionsAsync().then(() => {
+      registerForPushNotificationsAsync().then(async (token) => {
+        await User.updateUser(User.storedUser.id, {push_token: token})
+      });
+    });
   })
 
   return (

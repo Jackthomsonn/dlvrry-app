@@ -2,7 +2,7 @@ import 'react-native-gesture-handler';
 import 'firebase/functions';
 import "firebase/firestore";
 
-import React, { useEffect, useRef, useState } from 'react';
+import React, {  useState } from 'react';
 import { decode, encode } from 'base-64';
 
 import { AuthStackScreen } from './src/navigation/AuthStackNavigation';
@@ -17,7 +17,6 @@ import firebase from 'firebase';
 
 import * as Notifications from 'expo-notifications';
 
-import { Platform } from 'react-native';
 
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
@@ -36,38 +35,6 @@ const Tab = createBottomTabNavigator();
 export default function App() {
   const [ isLoggedIn, setLoggedInState ] = useState(false);
   const [ isLoading, setIsLoadingState ] = useState(true);
-  
-  const registerForPushNotificationsAsync = async () =>{
-    let token;
-
-  
-    if (Constants.isDevice) {
-      const { status: existingStatus } = await Notifications.getPermissionsAsync();
-      let finalStatus = existingStatus;
-      if (existingStatus !== 'granted') {
-        const { status } = await Notifications.requestPermissionsAsync();
-        finalStatus = status;
-      }
-      if (finalStatus !== 'granted') {
-        return;
-      }
-
-      token = (await Notifications.getExpoPushTokenAsync()).data;
-    } else {
-      alert('Must use physical device for Push Notifications');
-    }
-  
-    if (Platform.OS === 'android') {
-      Notifications.setNotificationChannelAsync('default', {
-        name: 'default',
-        importance: Notifications.AndroidImportance.MAX,
-        vibrationPattern: [0, 250, 250, 250],
-        lightColor: '#FF231F7C',
-      });
-    }
-  
-    return token;
-  }
 
   if (firebase.apps.length === 0) {
     const fi = firebase.initializeApp({
@@ -95,8 +62,6 @@ export default function App() {
       User.storedUserId = user.uid;
       const userData: any = await User.getUser(user.uid).get();
       User.storedUser = userData.data();
-      const token = await registerForPushNotificationsAsync();
-      await User.updateUser(user.uid, {push_token: token})
       setIsLoadingState(false);
       setLoggedInState(true);
     }
