@@ -42,7 +42,7 @@ interface JobCardProps {
 
 export const JobCard = (props: JobCardProps) => {
   const navigation = useNavigation();
-  const [ isLoading, setIsLoading ] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   const acceptJob = async (id: string, rider_id: string) => {
     try {
@@ -113,12 +113,16 @@ export const JobCard = (props: JobCardProps) => {
                   title="Accept job"
                   onPress={() => acceptJob(props.job.id, User.storedUserId)}
                   loading={isLoading} />
-                : <JobStatusLabel id={props.job.id} status={props.job.status} cb={cancelJob} isLoading={isLoading} completePaymentCb={() => {
-                  navigation.navigate('AuthenticatePayment', {
-                    client_secret: props.job.complete_payment_link,
-                    payment_method_id: props.job.complete_payment_method_link,
-                  });
-                }} />
+                : <JobStatusLabel id={props.job.id}
+                  status={props.job.status}
+                  cancelJobCb={() => cancelJob(props.job.id)}
+                  isLoading={isLoading}
+                  completePaymentCb={() => {
+                    navigation.navigate('AuthenticatePayment', {
+                      client_secret: props.job.complete_payment_link,
+                      payment_method_id: props.job.complete_payment_method_link,
+                    });
+                  }} />
             }
           </View>
         </View>

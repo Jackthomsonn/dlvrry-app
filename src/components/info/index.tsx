@@ -15,9 +15,14 @@ interface InfoProps {
 
 export const Info = (props: InfoProps) => {
   const navigation = useNavigation();
-  const [ isCancellingJob, setIsCancellingJob ] = useState(false);
-  const [ isCompletingJob, setIsCompletingJob ] = useState(false);
-  const [ currentProgress, setCurrentProgress ] = useState('in_progress');
+  const [isCancellingJob, setIsCancellingJob] = useState(false);
+  const [isCompletingJob, setIsCompletingJob] = useState(false);
+  const [currentProgress, setCurrentProgress] = useState('in_progress');
+  const [showCancelJobDialog, setShowCancelJobDialog] = useState(false)
+
+  const maybeCancelJob = () => {
+    setShowCancelJobDialog(true)
+  }
 
   const cancelJob = async () => {
     try {
@@ -134,14 +139,29 @@ export const Info = (props: InfoProps) => {
             {
               currentProgress === JobStatus.IN_PROGRESS
                 ? <Button showIcon={true} title={'Get directions'} onPress={() => openDirectionsViewer()} type={'primary'} loading={isCompletingJob} />
-                : <Button showIcon={true} title={'Complete job'} onPress={() => completeJob()} type={'primary'} loading={isCompletingJob} />
+                // Check position here
+                : 1 === 2 ?
+                  <Button showIcon={true} title={'Complete job'} onPress={() => completeJob()} type={'primary'} loading={isCompletingJob} />
+                  : <Text style={{ fontWeight: '500', color: variables.secondaryColor, textAlign: 'center', ...variables.fontStyle }}>You must be within the customers destination to mark a job as complete</Text>
             }
             <View style={{ justifyContent: 'center', alignItems: 'center', marginBottom: 24 }}>
-              <Button showIcon={true} title={'Cancel job'} onPress={() => cancelJob()} type='link' loading={isCancellingJob} loaderColor={variables.secondaryColor} />
+              <Button showIcon={true} title={'Cancel job'} onPress={() => maybeCancelJob()} type='link' loading={isCancellingJob} loaderColor={variables.secondaryColor} />
             </View>
           </View>
         </View>
       </View>
+      {
+        showCancelJobDialog
+          ? <View style={{ display: 'flex', justifyContent: 'center', position: 'absolute', width: '100%', height: '100%', backgroundColor: 'rgba(255, 255, 255, 0.97)', padding: 24 }}>
+            <Text style={{ marginBottom: 24, fontWeight: '500', color: variables.secondaryColor, textAlign: 'center', ...variables.fontStyle }}>You can only cancel a job so many times before your account will be suspended. Please only accept jobs you know you can complete</Text>
+            <Button showIcon={true} title={'I am sure I want to cancel'} onPress={() => cancelJob()} type={'primary'} loading={isCancellingJob} />
+            <View style={{ marginTop: 24 }}>
+              <Button showIcon={true} title={'Dont cancel this job'} onPress={() => setShowCancelJobDialog(false)} type={'secondary'} />
+            </View>
+          </View>
+          : undefined
+      }
+
     </>
   )
 }

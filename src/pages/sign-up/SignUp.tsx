@@ -30,8 +30,8 @@ const styles = StyleSheet.create({
 
 export function SignUpScreen() {
   const { register, handleSubmit, setValue, errors, getValues, setError } = useForm();
-  const [ isLoading, setIsLoading ] = useState(false);
-  const [ isSigningupAsARider, setIsSigningupAsARider ] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
+  const [isSigningupAsARider, setIsSigningupAsARider] = useState(true);
 
   useEffect(() => {
     register('name', {
@@ -75,7 +75,7 @@ export function SignUpScreen() {
     return () => {
 
     }
-  }, [ register ])
+  }, [register])
 
   const onSubmit = async () => {
     setIsLoading(true);
@@ -209,6 +209,8 @@ export function SignUpScreen() {
               ? <Text style={styles.errorText}>{errors.firebaseErrors.message}</Text>
               : undefined
           }
+
+          <Text style={{ fontWeight: '500' }}>By clicking the 'Get Started' button below you accept the terms and conditions set out by us, Dlvrry</Text>
 
           <View style={{ marginTop: 12 }}>
             <Button showIcon={true} type="primary" title="Get started" onPress={handleSubmit(onSubmit)} loading={isLoading}></Button>

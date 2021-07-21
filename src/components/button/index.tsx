@@ -20,8 +20,14 @@ const styles = StyleSheet.create({
   large: {
     padding: 16
   },
-  primaryNoBorder: {
+  primaryBorder: {
     borderColor: variables.primaryColor,
+    borderWidth: 1,
+    borderRadius: 4,
+    padding: 16
+  },
+  lightBorder: {
+    borderColor: variables.light,
     borderWidth: 1,
     borderRadius: 4,
     padding: 16
@@ -46,8 +52,15 @@ const styles = StyleSheet.create({
     fontSize: 16,
     ...variables.fontStyle
   },
-  primaryNoBorderText: {
+  primaryBorderText: {
     color: variables.primaryColor,
+    textAlign: 'center',
+    fontWeight: '500',
+    fontSize: 16,
+    ...variables.fontStyle
+  },
+  lightBorderText: {
+    color: variables.light,
     textAlign: 'center',
     fontWeight: '500',
     fontSize: 16,
@@ -79,7 +92,7 @@ const styles = StyleSheet.create({
 interface ButtonProps {
   onPress: Function;
   title: string;
-  type: 'primary' | 'primaryNoBorder' | 'secondary' | 'disabled' | 'light' | 'link';
+  type: 'primary' | 'primaryBorder' | 'secondary' | 'disabled' | 'light' | 'link' | 'lightBorder';
   size?: 'small' | 'medium' | 'large';
   showIcon?: boolean;
   iconColor?: string;
@@ -89,7 +102,7 @@ interface ButtonProps {
 
 export const Button = (props: ButtonProps) => {
   return (
-    <TouchableOpacity hitSlop={{ top: 20, bottom: 20, left: 20, right: 20 }} style={[ styles[ props.type ], styles[ props.size ] ]} onPress={() => props.onPress()}>
+    <TouchableOpacity hitSlop={{ top: 20, bottom: 20, left: 20, right: 20 }} style={[styles[props.type], styles[props.size]]} onPress={() => props.onPress()}>
       {
         props.loading
           ? <>
@@ -100,7 +113,7 @@ export const Button = (props: ButtonProps) => {
           :
           <>
             <View style={{ display: 'flex', alignItems: 'center', flexDirection: 'row', justifyContent: 'space-between' }}>
-              <Text style={styles[ props.type + 'Text' ]}>{props.title}</Text>
+              <Text style={styles[props.type + 'Text']}>{props.title}</Text>
               {props.showIcon ? <Ionicons name="md-arrow-forward" size={22} color={props.iconColor ? props.iconColor : variables.light} /> : undefined}
             </View>
           </>

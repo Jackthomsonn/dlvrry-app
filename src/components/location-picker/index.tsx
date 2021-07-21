@@ -33,7 +33,7 @@ export const LocationPicker = (props: { height: number, onChange: Function }) =>
       alert('Location not granted');
     }
 
-    let location = await Location.getCurrentPositionAsync({ accuracy: Location.LocationAccuracy.BestForNavigation });
+    let location = await Location.getCurrentPositionAsync({ accuracy: Location.LocationAccuracy.Balanced });
 
     setCurrentLocation(`${ location.coords.latitude }, ${ location.coords.longitude }`);
 

@@ -1,6 +1,6 @@
 import { AccountType, IJob, IUser, JobStatus } from 'dlvrry-common';
-import {  Platform, SafeAreaView, SectionList, StyleSheet, Text, View } from 'react-native';
-import React, {  useState } from 'react';
+import { Platform, SafeAreaView, SectionList, StyleSheet, Text, View } from 'react-native';
+import React, { useState } from 'react';
 import { useCollectionData, useDocumentData } from 'react-firebase-hooks/firestore';
 import { useFocusEffect, useNavigation } from "@react-navigation/native";
 
@@ -16,6 +16,8 @@ import { User } from "../../services/user";
 import { variables } from '../../../Variables';
 
 import * as Notifications from 'expo-notifications';
+import SuspendedSvg from '../../components/svg/suspended';
+import WaitingSvg from '../../components/svg/waiting';
 
 const styles = StyleSheet.create({
   host: {
@@ -27,25 +29,22 @@ const styles = StyleSheet.create({
 export function HomeScreen() {
   const navigation = useNavigation();
 
-  const [ businessHasConnectedCard, setBusinessHasConnectedCard ] = useState(false);
-  const [ user ] = useDocumentData<IUser>(User.getUser(User.storedUserId));
+  const [businessHasConnectedCard, setBusinessHasConnectedCard] = useState(false);
+  const [user] = useDocumentData<IUser>(User.getUser(User.storedUserId));
 
-  const [ jobsPendingOrCancelled, jobsPendingOrCancelledLoading, jobsPendingOrCancelledError ] = useCollectionData<IJob>(
+  const [allJobs, allJobsLoading, allJobsError] = useCollectionData<IJob>(
     user?.account_type === AccountType.RIDER
-      ? Job.getJobs([ JobStatus.PENDING, JobStatus.CANCELLED_BY_RIDER ])
-      : Job.getJobsForBusiness(User.storedUserId, [ JobStatus.PENDING, JobStatus.CANCELLED_BY_RIDER, JobStatus.IN_PROGRESS ], 100)
-  )
-
-  const [ jobsCompleted, jobsCompletedLoading, jobsCompletedError ] = useCollectionData<IJob>(
-    user?.account_type === AccountType.BUSINESS
-      ? Job.getJobsForBusiness(User.storedUserId, [ JobStatus.COMPLETED, JobStatus.REFUNDED ], 5)
-      : undefined
-  )
-
-  const [ jobsAwaitingPayment, jobsAwaitingPaymentLoading, jobsAwaitingPaymentError ] = useCollectionData<IJob>(
-    user?.account_type === AccountType.BUSINESS
-      ? Job.getJobsForBusiness(User.storedUserId, [ JobStatus.AWAITING_PAYMENT ], 5)
-      : undefined
+      ? Job.getJobs([JobStatus.PENDING, JobStatus.CANCELLED_BY_RIDER])
+      : Job.getJobsForBusiness(User.storedUserId, [
+        JobStatus.PENDING,
+        JobStatus.CANCELLED_BY_RIDER,
+        JobStatus.IN_PROGRESS,
+        JobStatus.REFUNDED,
+        JobStatus.PAYMENT_FAILED,
+        JobStatus.AWAITING_PAYMENT,
+        JobStatus.CANCELLED_BY_OWNER,
+        JobStatus.COMPLETED,
+      ], 100)
   )
 
   const getConnectedCards = async () => {
@@ -64,14 +63,23 @@ export function HomeScreen() {
         <Header main="Available" sub="jobs"></Header>
         <View style={{ padding: 24, flex: 1 }}>
           {
-            jobsPendingOrCancelled?.length > 0
-              ? <FlatList showsVerticalScrollIndicator={false} data={jobsPendingOrCancelled} keyExtractor={(_item, index) => index.toString()} renderItem={({ item }) => <JobCard user={user} job={item} account_type={user.account_type} />}></FlatList>
-              : <>
-                <View style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}>
-                  <NoResultsSvg width={180} height={180} />
-                  <Text style={{ fontWeight: '500', color: variables.secondaryColor, fontSize: 16, ...variables.fontStyle, marginTop: 12 }}>No jobs found</Text>
-                </View>
-              </>
+            user.cancelled_jobs >= 5
+              ?
+              <View style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}>
+                <SuspendedSvg width={180} height={180} />
+                <Text style={{ fontWeight: '500', color: variables.secondaryColor, fontSize: 16, ...variables.fontStyle, marginTop: 12, textAlign: 'center' }}>
+                  Your account has been suspended. You have cancelled too many jobs in a short space of time. If you believe this is an error, please contact us at hello@dlvrry.io
+                </Text>
+              </View>
+              :
+              allJobs?.length > 0
+                ? <FlatList showsVerticalScrollIndicator={false} data={allJobs} keyExtractor={(_item, index) => index.toString()} renderItem={({ item }) => <JobCard user={user} job={item} account_type={user.account_type} />}></FlatList>
+                : <>
+                  <View style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}>
+                    <NoResultsSvg width={180} height={180} />
+                    <Text style={{ fontWeight: '500', color: variables.secondaryColor, fontSize: 16, ...variables.fontStyle, marginTop: 12, textAlign: 'center' }}>No jobs found. This page will update automatically when jobs become available</Text>
+                  </View>
+                </>
           }
         </View>
       </>
@@ -96,16 +104,10 @@ export function HomeScreen() {
                 <Header main={title} sub="jobs" hideAvatar={true} subheader={true}></Header>
               </View>
             )}
-            sections={[ {
-              title: 'Active',
-              data: jobsPendingOrCancelled
-            }, {
-              title: 'Awaiting payment',
-              data: jobsAwaitingPayment
-            }, {
-              title: 'Completed',
-              data: jobsCompleted
-            } ]}>
+            sections={[{
+              title: 'All',
+              data: allJobs
+            }]}>
 
           </SectionList>
 
@@ -141,7 +143,7 @@ export function HomeScreen() {
     )
   }
 
-  const registerForPushNotificationsAsync = async () =>{
+  const registerForPushNotificationsAsync = async () => {
     let token: string;
 
     if (Constants.isDevice) {
@@ -160,7 +162,7 @@ export function HomeScreen() {
     } else {
       alert('Must use physical device for Push Notifications');
     }
-  
+
     if (Platform.OS === 'android') {
       Notifications.setNotificationChannelAsync('default', {
         name: 'default',
@@ -169,7 +171,7 @@ export function HomeScreen() {
         lightColor: '#FF231F7C',
       });
     }
-  
+
     return token;
   }
 
@@ -178,7 +180,7 @@ export function HomeScreen() {
 
     Notifications.getPermissionsAsync().then(() => {
       registerForPushNotificationsAsync().then(async (token) => {
-        await User.updateUser(User.storedUser.id, {push_token: token})
+        await User.updateUser(User.storedUser.id, { push_token: token })
       });
     });
   })
@@ -186,16 +188,23 @@ export function HomeScreen() {
   return (
     <SafeAreaView style={styles.host}>
       {
-        jobsPendingOrCancelledLoading || jobsCompletedLoading || jobsAwaitingPaymentLoading
-          ? <Loader />
-          : user?.account_type === AccountType.RIDER
-            ? riderView()
-            : businessView()
+        user?.verified ?
+          allJobsLoading
+            ? <Loader />
+            : user?.account_type === AccountType.RIDER
+              ? riderView()
+              : businessView()
+          : <View style={{ padding: 24, display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}>
+            <WaitingSvg width={180} height={180} />
+            <Text style={{ fontWeight: '500', color: variables.secondaryColor, fontSize: 16, ...variables.fontStyle, marginTop: 12, textAlign: 'center' }}>
+              Your account is pending manual verification. You will receive an email when your account has been verified this takes around 24-48 hours to complete
+            </Text>
+          </View>
       }
 
-      <Text>{jobsPendingOrCancelledError ?? jobsPendingOrCancelledError}</Text>
-      <Text>{jobsCompletedError ?? jobsCompletedError}</Text>
-      <Text>{jobsAwaitingPaymentError ?? jobsAwaitingPaymentError}</Text>
+      <Text>{allJobsError ?? allJobsError}</Text>
+      {/* <Text>{jobsCompletedError ?? jobsCompletedError}</Text> */}
+      {/* <Text>{jobsAwaitingPaymentError ?? jobsAwaitingPaymentError}</Text> */}
 
     </SafeAreaView >
   );

@@ -2,7 +2,7 @@ import 'react-native-gesture-handler';
 import 'firebase/functions';
 import "firebase/firestore";
 
-import React, {  useState } from 'react';
+import React, { useState } from 'react';
 import { decode, encode } from 'base-64';
 
 import { AuthStackScreen } from './src/navigation/AuthStackNavigation';
@@ -26,15 +26,15 @@ Notifications.setNotificationHandler({
   }),
 });
 
-if (!global[ 'btoa' ]) { global[ 'btoa' ] = encode }
+if (!global['btoa']) { global['btoa'] = encode }
 
-if (!global[ 'atob' ]) { global[ 'atob' ] = decode }
+if (!global['atob']) { global['atob'] = decode }
 
 const Tab = createBottomTabNavigator();
 
 export default function App() {
-  const [ isLoggedIn, setLoggedInState ] = useState(false);
-  const [ isLoading, setIsLoadingState ] = useState(true);
+  const [isLoggedIn, setLoggedInState] = useState(false);
+  const [isLoading, setIsLoadingState] = useState(true);
 
   if (firebase.apps.length === 0) {
     const fi = firebase.initializeApp({

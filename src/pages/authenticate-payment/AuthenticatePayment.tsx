@@ -3,15 +3,20 @@ import React, { useState } from 'react';
 import { CardService } from '../../services/card';
 import { WebView } from 'react-native-webview';
 import { useNavigation } from "@react-navigation/native";
+import Constants from 'expo-constants';
 
 export function AuthenticatePaymentScreen(props: any) {
   const navigation = useNavigation();
-  const [ inProgress, setInProgress ] = useState(true);
+  const [inProgress, setInProgress] = useState(true);
+
+  const url = Constants.manifest.extra.useEmulator
+    ? 'https://dlvrry-payment-hgwx8lxfr-jackthomson.vercel.app'
+    : 'https://payment.dlvrry.io'
 
   return (
     <WebView
-      originWhitelist={[ '*' ]}
-      source={{ uri: `https://payment.dlvrry.io?&client_secret=${ props.route.params.client_secret }&payment_method_id=${ props.route.params.payment_method_id }` }}
+      originWhitelist={['*']}
+      source={{ uri: `${url}?&client_secret=${props.route.params.client_secret}&payment_method_id=${props.route.params.payment_method_id}` }}
       onNavigationStateChange={async (e) => {
         if (e.url.includes('success=true')) {
           CardService.authenticationCompleted.next({ completed: true });
