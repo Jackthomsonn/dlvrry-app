@@ -23,15 +23,15 @@ interface MapProps {
 export const Map = (props: MapProps) => {
   let map: MapView;
 
-  const [ usersCurrentLocation, setUsersCurrentLocation ] = useState<Location.LocationObject>(undefined);
-  const [ isReady, setIsReady ] = useState(false);
+  const [usersCurrentLocation, setUsersCurrentLocation] = useState<Location.LocationObject>(undefined);
+  const [isReady, setIsReady] = useState(false);
 
   useEffect(() => {
     setup();
   }, []);
 
   const setup = async () => {
-    let { status } = await Location.requestPermissionsAsync();
+    let { status } = await Location.requestForegroundPermissionsAsync();
 
     if (status !== 'granted') {
       alert('Location not granted');
@@ -64,7 +64,7 @@ export const Map = (props: MapProps) => {
           pitch: 80,
           heading: usersCurrentLocation.coords.heading
         }}
-        mapPadding={{ bottom: 150, top: 0, left: 0, right: 0 }}
+        mapPadding={{ bottom: 168, top: 0, left: 0, right: 0 }}
         showsPointsOfInterest={false}
         showsCompass={true}
         loadingEnabled={true}
@@ -75,10 +75,10 @@ export const Map = (props: MapProps) => {
             latitude: usersCurrentLocation?.coords.latitude,
             longitude: usersCurrentLocation?.coords.longitude
           }}
-          waypoints={[ {
+          waypoints={[{
             latitude: props.pickupAddress.latitude,
             longitude: props.pickupAddress.longitude
-          } ]}
+          }]}
           destination={{ latitude: props.customerAddress.latitude, longitude: props.customerAddress.longitude }}
           apikey={Constants.manifest.extra.apiKey}
           strokeWidth={3}

@@ -1,5 +1,5 @@
 import { AccountType, ModeType, VerificationStatus } from 'dlvrry-common';
-import { KeyboardAvoidingView, StyleSheet, Text, View } from 'react-native';
+import { Dimensions, KeyboardAvoidingView, StyleSheet, Text, View } from 'react-native';
 import React, { useEffect, useState } from 'react';
 
 import { Button } from '../../components/button';
@@ -19,7 +19,8 @@ const styles = StyleSheet.create({
     backgroundColor: variables.pageBackgroundColor
   },
   keyboardView: {
-    margin: 24
+    flex: 1,
+    margin: 24,
   },
   errorText: {
     color: variables.warning,
@@ -61,7 +62,7 @@ export function SignUpScreen() {
 
     register('mode', {
       required: {
-        message: 'You must provide a vehicle you will be using to deliver goods',
+        message: 'You must provide a mode of transport you will be using to deliver goods',
         value: true
       }
     });
@@ -69,8 +70,6 @@ export function SignUpScreen() {
     register('firebaseErrors');
 
     setValue('account_type', AccountType.RIDER);
-
-    setValue('mode', ModeType.BIKE);
 
     return () => {
 
@@ -131,7 +130,7 @@ export function SignUpScreen() {
       <ScrollView>
         <Header main="Get" sub="started" showBackButton={true} />
 
-        <KeyboardAvoidingView behavior="padding" style={styles.keyboardView}>
+        <KeyboardAvoidingView behavior="position" keyboardVerticalOffset={50} style={styles.keyboardView}>
           <Text style={{ marginBottom: 8 }}>Account type</Text>
           <DropDownPicker
             defaultValue="rider"
@@ -168,18 +167,19 @@ export function SignUpScreen() {
               ? <>
                 <Text style={{ marginBottom: 8, marginTop: 12 }}>How will you be delivering goods?</Text>
                 <DropDownPicker
-                  defaultValue="bike"
+                  placeholder={'Select a mode of transport'}
                   items={[
                     { label: 'Bike', value: ModeType.BIKE },
+                    { label: 'Car', value: ModeType.CAR },
                   ]}
                   containerStyle={{ height: 40, marginBottom: 12 }}
                   itemStyle={{ justifyContent: 'flex-start' }}
-                  onChangeItem={response => setValue('vehicle', response.value)}
+                  onChangeItem={response => setValue('mode', response.value)}
                 />
 
                 {
-                  errors.vehicle
-                    ? <Text style={styles.errorText}>{errors.vehicle.message}</Text>
+                  errors.mode
+                    ? <Text style={styles.errorText}>{errors.mode.message}</Text>
                     : undefined
                 }
               </>

@@ -13,6 +13,7 @@ import { User } from "../../services/user";
 import { useForm } from "react-hook-form";
 import { useNavigation } from "@react-navigation/native";
 import { variables } from "../../../Variables";
+import { ScrollView } from "react-native-gesture-handler";
 
 const styles = StyleSheet.create({
   host: {
@@ -40,7 +41,7 @@ const styles = StyleSheet.create({
 export const CreateJobScreen = () => {
   const navigation = useNavigation();
 
-  const [ isSubmitting, setIsSubmitting ] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const { register, handleSubmit, setValue, errors } = useForm();
 
@@ -78,7 +79,7 @@ export const CreateJobScreen = () => {
 
   useEffect(() => {
     setup();
-  }, [ register ]);
+  }, [register]);
 
   const setup = async () => {
     register('cost', {
@@ -87,8 +88,8 @@ export const CreateJobScreen = () => {
         value: true
       },
       min: {
-        message: 'You must enter a minimum amount of £5',
-        value: 500
+        message: 'You must enter a minimum amount of £7',
+        value: 700
       },
       valueAsNumber: true
     });
@@ -104,6 +105,8 @@ export const CreateJobScreen = () => {
         value: true
       }
     });
+    register('customer_location_name');
+    register('pickup_location_name');
     register('number_of_items', {
       required: {
         message: 'You must specify the amount of items included in this job',
@@ -125,8 +128,8 @@ export const CreateJobScreen = () => {
   }
 
   const handleError = (modelName: string) => {
-    if (modelName && errors[ modelName ]) {
-      return (<Text style={styles.errorText}>{errors[ modelName ].message}</Text>);
+    if (modelName && errors[modelName]) {
+      return (<Text style={styles.errorText}>{errors[modelName].message}</Text>);
     }
 
     return undefined;
@@ -138,24 +141,12 @@ export const CreateJobScreen = () => {
         <Header main="Create" sub="job" showBackButton={true} />
 
         {
-          <KeyboardAvoidingView behavior={'padding'} style={styles.keyboardView}>
+          <KeyboardAvoidingView behavior={'position'} keyboardVerticalOffset={100} style={styles.keyboardView}>
             <Text style={{ marginBottom: 8 }}>Cost (£)</Text>
 
             <Input keyboardType={'numbers-and-punctuation'} onChange={value => setValue('cost', value * 100)} />
 
             {handleError('cost')}
-
-            <Text style={{ marginBottom: 8 }}>Pickup location</Text>
-
-            <LocationPicker height={46} onChange={value => setValue('pickup_location', value)} />
-
-            {handleError('pickup_location')}
-
-            <Text style={{ marginBottom: 8 }}>Customer location</Text>
-
-            <LocationPicker height={46} onChange={value => setValue('customer_location', value)} />
-
-            {handleError('customer_location')}
 
             <Text style={{ marginBottom: 8 }}>Number of items</Text>
 
@@ -168,6 +159,24 @@ export const CreateJobScreen = () => {
             <Input keyboardType={'number-pad'} onChange={value => setValue('phone_number', value)} />
 
             {handleError('phone_number')}
+
+            <Text style={{ marginBottom: 8 }}>Pickup location</Text>
+
+            <LocationPicker height={46} onChange={({ latitude, longitude, streetNumber, streetName }) => {
+              setValue('pickup_location', { latitude, longitude })
+              setValue('pickup_location_name', `${streetNumber} ${streetName}`)
+            }} />
+
+            {handleError('pickup_location')}
+
+            <Text style={{ marginBottom: 8 }}>Customer location</Text>
+
+            <LocationPicker height={46} onChange={({ latitude, longitude, streetNumber, streetName }) => {
+              setValue('customer_location', { latitude, longitude })
+              setValue('customer_location_name', `${streetNumber} ${streetName}`)
+            }} />
+
+            {handleError('customer_location')}
 
             <Button showIcon={true} type="primary" title="Create job" onPress={handleSubmit(onSubmit)} loading={isSubmitting} ></Button>
           </KeyboardAvoidingView>

@@ -1,5 +1,5 @@
-import { IJob, JobStatus } from "dlvrry-common";
-import React, { useState } from "react";
+import { IJob, IUser, JobStatus } from "dlvrry-common";
+import React, { useEffect, useState } from "react";
 import { Text, View } from "react-native";
 
 import { Button } from "../button";
@@ -7,6 +7,11 @@ import { Job } from "../../services/job";
 import getDirections from 'react-native-google-maps-directions'
 import { useNavigation } from "@react-navigation/native";
 import { variables } from "../../../Variables";
+import * as Location from 'expo-location';
+import haversine from 'haversine';
+import { LatLng } from "react-native-maps";
+import { User } from '../../services/user';
+import { useDocumentData } from "react-firebase-hooks/firestore";
 
 interface InfoProps {
   job: IJob,
@@ -19,6 +24,8 @@ export const Info = (props: InfoProps) => {
   const [isCompletingJob, setIsCompletingJob] = useState(false);
   const [currentProgress, setCurrentProgress] = useState('in_progress');
   const [showCancelJobDialog, setShowCancelJobDialog] = useState(false)
+  const [currentPosition, setCurrentPosition] = useState<LatLng>({ latitude: undefined, longitude: undefined });
+  const [user] = useDocumentData<IUser>(User.getUser(User.storedUserId));
 
   const maybeCancelJob = () => {
     setShowCancelJobDialog(true)
@@ -34,9 +41,12 @@ export const Info = (props: InfoProps) => {
 
       setCurrentProgress('in_progress');
 
+      setShowCancelJobDialog(false);
+
       navigation.goBack();
     } catch (e) {
       setIsCancellingJob(false);
+      setShowCancelJobDialog(false);
       alert(e);
     }
   }
@@ -64,6 +74,7 @@ export const Info = (props: InfoProps) => {
   }
 
   const openDirectionsViewer = async () => {
+
     const data = {
       destination: {
         latitude: props.job.customer_location.latitude,
@@ -72,7 +83,7 @@ export const Info = (props: InfoProps) => {
       params: [
         {
           key: "travelmode",
-          value: "bicycling"
+          value: user.mode
         },
         {
           key: "dir_action",
@@ -92,6 +103,19 @@ export const Info = (props: InfoProps) => {
     setCurrentProgress('get_directions');
   }
 
+  const riderIsWithinDistanceToCompleteJob = (destination: LatLng) => {
+    return haversine(currentPosition, destination, { unit: 'meter', threshold: 50 })
+  }
+
+  useEffect(() => {
+    Location.watchPositionAsync({ accuracy: Location.LocationAccuracy.BestForNavigation }, location => {
+      setCurrentPosition({
+        latitude: location.coords.latitude,
+        longitude: location.coords.longitude,
+      })
+    });
+  }, [])
+
   return (
     <>
       <View style={{
@@ -99,7 +123,7 @@ export const Info = (props: InfoProps) => {
         bottom: 168,
         borderTopLeftRadius: 20,
         borderTopRightRadius: 20,
-        height: '15%',
+        height: '20%',
         backgroundColor: variables.light,
         display: 'flex',
         flexDirection: 'column',
@@ -125,8 +149,8 @@ export const Info = (props: InfoProps) => {
 
         <View style={{ flexDirection: 'row', height: 50, backgroundColor: variables.light, }}>
           <View style={{ borderTopRightRadius: 50, width: '50%', justifyContent: 'center', alignItems: 'center' }}>
-            <Text style={{ fontWeight: '500', color: variables.primaryColor, fontSize: 16, ...variables.fontStyle }}>Number of items</Text>
-            <Text style={{ fontWeight: '700', color: variables.secondaryColor, fontSize: 18, ...variables.fontStyle }}>{props.job.number_of_items}</Text>
+            <Text style={{ fontWeight: '500', color: variables.primaryColor, fontSize: 16, ...variables.fontStyle }}>Phone number</Text>
+            <Text style={{ fontWeight: '700', color: variables.secondaryColor, fontSize: 18, ...variables.fontStyle }}>{props.job.phone_number ? props.job.phone_number : 'N/A'}</Text>
           </View>
           <View style={{ borderTopRightRadius: 50, width: '50%', justifyContent: 'center', alignItems: 'center' }}>
             <Text style={{ fontWeight: '500', color: variables.primaryColor, fontSize: 16, ...variables.fontStyle }}>Job ID</Text>
@@ -134,13 +158,12 @@ export const Info = (props: InfoProps) => {
           </View>
         </View>
 
-        <View style={{ height: 140, backgroundColor: variables.light, justifyContent: 'center', alignItems: 'center' }}>
-          <View style={{ width: '80%' }}>
+        <View style={{ height: 180, backgroundColor: variables.light, justifyContent: 'center', alignItems: 'center' }}>
+          <View style={{ width: '80%', marginTop: 24 }}>
             {
               currentProgress === JobStatus.IN_PROGRESS
                 ? <Button showIcon={true} title={'Get directions'} onPress={() => openDirectionsViewer()} type={'primary'} loading={isCompletingJob} />
-                // Check position here
-                : 1 === 2 ?
+                : riderIsWithinDistanceToCompleteJob(props.job.customer_location) ?
                   <Button showIcon={true} title={'Complete job'} onPress={() => completeJob()} type={'primary'} loading={isCompletingJob} />
                   : <Text style={{ fontWeight: '500', color: variables.secondaryColor, textAlign: 'center', ...variables.fontStyle }}>You must be within the customers destination to mark a job as complete</Text>
             }

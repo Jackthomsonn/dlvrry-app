@@ -8,9 +8,9 @@ import { View } from 'react-native';
 
 export const LocationPicker = (props: { height: number, onChange: Function }) => {
   const ref: any = useRef();
-  const [ locationHeight, setLocationHeight ] = useState(props.height);
-  const [ currentLocation, setCurrentLocation ] = useState(undefined);
-  const [ isLoading, setIsLoading ] = useState(true);
+  const [locationHeight, setLocationHeight] = useState(props.height);
+  const [currentLocation, setCurrentLocation] = useState(undefined);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     setInterval(() => {
@@ -27,7 +27,7 @@ export const LocationPicker = (props: { height: number, onChange: Function }) =>
   }, []);
 
   const setup = async () => {
-    let { status } = await Location.requestPermissionsAsync();
+    let { status } = await Location.requestForegroundPermissionsAsync();
 
     if (status !== 'granted') {
       alert('Location not granted');
@@ -35,7 +35,7 @@ export const LocationPicker = (props: { height: number, onChange: Function }) =>
 
     let location = await Location.getCurrentPositionAsync({ accuracy: Location.LocationAccuracy.Balanced });
 
-    setCurrentLocation(`${ location.coords.latitude }, ${ location.coords.longitude }`);
+    setCurrentLocation(`${location.coords.latitude}, ${location.coords.longitude}`);
 
     setIsLoading(false);
   }
@@ -64,7 +64,9 @@ export const LocationPicker = (props: { height: number, onChange: Function }) =>
               setLocationHeight(46);
               props.onChange({
                 latitude: details.geometry.location.lat,
-                longitude: details.geometry.location.lng
+                longitude: details.geometry.location.lng,
+                streetNumber: details.address_components[0].long_name,
+                streetName: details.address_components[1].long_name,
               })
             }}
             query={{

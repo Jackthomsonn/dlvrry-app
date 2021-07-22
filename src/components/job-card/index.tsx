@@ -89,9 +89,19 @@ export const JobCard = (props: JobCardProps) => {
     <View style={styles.host} >
       <View style={styles.column}>
         <View style={styles.column}>
-          <View style={{ display: 'flex', flexDirection: 'row' }}>
-            <Ionicons name="ios-pin" size={18} color={variables.light} style={{ marginRight: 12 }} />
-            <Text style={{ fontWeight: '500', fontSize: 18, ...variables.fontStyle, marginBottom: 24, marginRight: 24, color: variables.light }}>{props.job.customer_location_name}</Text>
+          <View style={{ display: 'flex', flexDirection: 'column' }}>
+            <View style={{ display: 'flex', flexDirection: 'row' }}>
+              <Ionicons name="ellipse-outline" size={18} color={variables.light} style={{ marginRight: 12 }} />
+              <Text style={{ fontWeight: '500', fontSize: 18, ...variables.fontStyle, marginBottom: 12, marginRight: 24, color: variables.light }}>{props.job.pickup_location_name}</Text>
+            </View>
+            <View style={{ display: 'flex', flexDirection: 'column', marginBottom: 12 }}>
+              <Ionicons name="ellipse" size={8} color={variables.light} style={{ marginLeft: 4, marginBottom: 8 }} />
+              <Ionicons name="ellipse" size={8} color={variables.light} style={{ marginLeft: 4 }} />
+            </View>
+            <View style={{ display: 'flex', flexDirection: 'row' }}>
+              <Ionicons name="ellipse-outline" size={18} color={variables.light} style={{ marginRight: 12 }} />
+              <Text style={{ fontWeight: '500', fontSize: 18, ...variables.fontStyle, marginBottom: 24, marginRight: 24, color: variables.light }}>{props.job.customer_location_name}</Text>
+            </View>
           </View>
 
           <View style={{ display: 'flex', flexDirection: 'row' }}>
