@@ -12,6 +12,9 @@ end/functions/.runtimeconfig.json
 # Xcode
 #
 build/
+ios
+android
+app.json
 *.pbxuser
 !default.pbxuser
 *.mode1v3

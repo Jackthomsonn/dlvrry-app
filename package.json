@@ -7,11 +7,8 @@
     "generate": "node generator/index",
     "env:dev": "expo-env --env=development",
     "env:prod": "expo-env --env=prod",
-    "deploy:ios": "npm run env:prod && expo build:ios --release-channel staging",
-    "deploy:android": "npm run env:prod && expo build:android --release-channel staging",
     "findUsedPort": " netstat -vanp tcp | grep 8080",
-    "eas:build": "npm run env:prod && eas build",
-    "eas:deploy": "eas submit"
+    "deploy": "npm run env:prod && eas build && eas deploy"
   },
   "dependencies": {
     "@react-native-async-storage/async-storage": "~1.15.0",
