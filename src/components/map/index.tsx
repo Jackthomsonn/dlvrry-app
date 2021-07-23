@@ -31,11 +31,15 @@ export const Map = (props: MapProps) => {
   }, []);
 
   const setup = async () => {
-    let { status } = await Location.requestForegroundPermissionsAsync();
+    // const location_status = await Location.getForegroundPermissionsAsync();
 
-    if (status !== 'granted') {
-      alert('Location not granted');
-    }
+    // if (!location_status.granted) {
+    //   let { status } = await Location.requestForegroundPermissionsAsync();
+
+    //   if (status !== 'granted') {
+    //     alert('Location not granted');
+    //   }
+    // }
 
     let location = await Location.getCurrentPositionAsync({ accuracy: Location.LocationAccuracy.BestForNavigation });
 

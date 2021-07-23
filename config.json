@@ -24,7 +24,13 @@
     ],
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.jackthomson.dlvrry"
+      "bundleIdentifier": "com.jackthomson.dlvrry",
+      "infoPlist": {
+        "NSLocationUsageDescription": "The app needs permission to access your location, if you want to be located on the map.",
+        "NSLocationWhenInUseUsageDescription": "The app needs permission to access your location, if you want to be located on the map",
+        "NSLocationAlwaysUsageDescription": "The app needs permission to access your location, if you want to be located on the map",
+        "NSLocationAlwaysAndWhenInUseUsageDescription": "The app needs permission to access your location, if you want to be located on the map"
+      }
     },
     "extra": {
       "functionsUri": "https://us-central1-dlvrry-33018.cloudfunctions.net",
