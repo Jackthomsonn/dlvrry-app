@@ -22,7 +22,7 @@
     "@stripe/stripe-js": "^1.11.0",
     "axios": "^0.21.0",
     "base-64": "^0.1.0",
-    "dlvrry-common": "0.0.27",
+    "dlvrry-common": "0.0.28",
     "expo": "^42.0.3",
     "expo-app-auth": "~10.2.2",
     "expo-auth-session": "~3.3.1",
