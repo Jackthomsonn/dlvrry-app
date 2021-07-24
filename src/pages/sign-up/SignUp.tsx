@@ -63,17 +63,13 @@ export function SignUpScreen() {
     register('mode', {
       required: {
         message: 'You must provide a mode of transport you will be using to deliver goods',
-        value: true
+        value: false
       }
     });
 
     register('firebaseErrors');
 
     setValue('account_type', AccountType.RIDER);
-
-    return () => {
-
-    }
   }, [register])
 
   const onSubmit = async () => {
@@ -169,12 +165,12 @@ export function SignUpScreen() {
                 <DropDownPicker
                   placeholder={'Select a mode of transport'}
                   items={[
-                    { label: 'Bike', value: ModeType.BIKE },
-                    { label: 'Car', value: ModeType.CAR },
+                    { label: 'Bike', value: ModeType.BICYCLING },
+                    { label: 'Car', value: ModeType.DRIVING },
                   ]}
                   containerStyle={{ height: 40, marginBottom: 12 }}
                   itemStyle={{ justifyContent: 'flex-start' }}
-                  onChangeItem={response => setValue('mode', response.value)}
+                  onChangeItem={response => { setValue('mode', response.value); console.log(response) }}
                 />
 
                 {
