@@ -1,12 +1,13 @@
 import * as Location from 'expo-location';
 
-import { ActivityIndicator, View } from 'react-native';
-import MapView, { Marker } from "react-native-maps"
+import { ActivityIndicator, Platform, View } from 'react-native';
+import MapView, { Marker, PROVIDER_GOOGLE } from "react-native-maps"
 import React, { useEffect, useState } from "react";
 
 import Constants from 'expo-constants';
 import MapViewDirections from "react-native-maps-directions"
 import { variables } from '../../../Variables';
+import * as Device from 'expo-device'
 
 interface MapProps {
   customerAddress: {
@@ -25,12 +26,15 @@ export const Map = (props: MapProps) => {
 
   const [usersCurrentLocation, setUsersCurrentLocation] = useState<Location.LocationObject>(undefined);
   const [isReady, setIsReady] = useState(false);
+  const [apiKey, setApiKey] = useState(undefined);
 
   useEffect(() => {
     setup();
   }, []);
 
   const setup = async () => {
+    obtainApiKey();
+
     let location = await Location.getCurrentPositionAsync({ accuracy: Location.LocationAccuracy.BestForNavigation });
 
     setUsersCurrentLocation(location);
@@ -38,10 +42,24 @@ export const Map = (props: MapProps) => {
     setIsReady(true);
   }
 
+  const obtainApiKey = () => {
+    if (Constants.appOwnership === null) {
+      if (Platform.OS === 'ios') {
+        setApiKey(Constants.manifest.extra.iosApiKey);
+      }
+
+      if (Platform.OS === 'android') {
+        setApiKey(Constants.manifest.extra.androidApiKey)
+      }
+    } else {
+      setApiKey(Constants.manifest.extra.apiKey)
+    }
+  }
+
   return (
     isReady
       ? <MapView
-        provider={'google'}
+        provider={PROVIDER_GOOGLE}
         ref={ref => { map = ref }}
         style={{
           display: 'flex',
@@ -74,7 +92,7 @@ export const Map = (props: MapProps) => {
             longitude: props.pickupAddress.longitude
           }]}
           destination={{ latitude: props.customerAddress.latitude, longitude: props.customerAddress.longitude }}
-          apikey={Constants.manifest.extra.apiKey}
+          apikey={apiKey}
           strokeWidth={3}
           strokeColor={variables.primaryColor}
           precision={'low'}

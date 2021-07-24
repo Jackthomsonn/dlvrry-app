@@ -9,5 +9,7 @@ module.exports = {
   storageBucket: "dlvrry-33018.appspot.com",
   messagingSenderId: "787206689882",
   appId: "1:787206689882:web:d009f38998e38e113c7463",
-  measurementId: "G-DN4W6FRRPE"
+  measurementId: "G-DN4W6FRRPE",
+  iosApiKey: "AIzaSyBO8cB32I8-0bgZSd1uxTrkZ0sGAp_hEDs",
+  androidApiKey: ""
 }
