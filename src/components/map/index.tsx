@@ -26,34 +26,17 @@ export const Map = (props: MapProps) => {
 
   const [usersCurrentLocation, setUsersCurrentLocation] = useState<Location.LocationObject>(undefined);
   const [isReady, setIsReady] = useState(false);
-  const [apiKey, setApiKey] = useState(undefined);
 
   useEffect(() => {
     setup();
   }, []);
 
   const setup = async () => {
-    obtainApiKey();
-
     let location = await Location.getCurrentPositionAsync({ accuracy: Location.LocationAccuracy.BestForNavigation });
 
     setUsersCurrentLocation(location);
 
     setIsReady(true);
-  }
-
-  const obtainApiKey = () => {
-    if (Constants.appOwnership === null) {
-      if (Platform.OS === 'ios') {
-        setApiKey(Constants.manifest.extra.iosApiKey);
-      }
-
-      if (Platform.OS === 'android') {
-        setApiKey(Constants.manifest.extra.androidApiKey)
-      }
-    } else {
-      setApiKey(Constants.manifest.extra.apiKey)
-    }
   }
 
   return (
@@ -92,7 +75,7 @@ export const Map = (props: MapProps) => {
             longitude: props.pickupAddress.longitude
           }]}
           destination={{ latitude: props.customerAddress.latitude, longitude: props.customerAddress.longitude }}
-          apikey={apiKey}
+          apikey={Constants.manifest.extra.apiKey}
           strokeWidth={3}
           strokeColor={variables.primaryColor}
           precision={'low'}

@@ -10,7 +10,7 @@
     "env:dev": "expo-env --env=development",
     "env:prod": "expo-env --env=prod",
     "findUsedPort": " netstat -vanp tcp | grep 8080",
-    "deploy": "npm run env:prod && eas build && eas deploy"
+    "deploy": "npm run env:prod && eas build && eas submit"
   },
   "dependencies": {
     "@react-native-async-storage/async-storage": "~1.15.0",
