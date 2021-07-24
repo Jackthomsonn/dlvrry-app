@@ -37,10 +37,8 @@
       }
     },
     "extra": {
-      "functionsUri": "https://dlvrry-functions.ngrok.io/dlvrry-33018/us-central1",
-      "authUri": "https://dlvrry-auth.ngrok.io",
-      "firestoreHost": "dlvrry-firestore.ngrok.io",
-      "useEmulator": true,
+      "functionsUri": "https://us-central1-dlvrry-33018.cloudfunctions.net",
+      "useEmulator": false,
       "apiKey": "AIzaSyCGDPRUz_vTChg2QDg-qMRlhxz7hGVlFFs",
       "authDomain": "dlvrry-33018.firebaseapp.com",
       "projectId": "dlvrry-33018",
