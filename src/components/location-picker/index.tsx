@@ -37,7 +37,7 @@ export const LocationPicker = (props: { height: number, onChange: Function }) =>
     //   }
     // }
 
-    let location = await Location.getCurrentPositionAsync({ accuracy: Location.LocationAccuracy.Balanced });
+    let location = await Location.getCurrentPositionAsync({ accuracy: Location.LocationAccuracy.BestForNavigation });
 
     setCurrentLocation(`${location.coords.latitude}, ${location.coords.longitude}`);
 

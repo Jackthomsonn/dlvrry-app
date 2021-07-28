@@ -1,13 +1,12 @@
 import * as Location from 'expo-location';
 
-import { ActivityIndicator, Platform, View } from 'react-native';
+import { ActivityIndicator, View } from 'react-native';
 import MapView, { Marker, PROVIDER_GOOGLE } from "react-native-maps"
 import React, { useEffect, useState } from "react";
 
 import Constants from 'expo-constants';
 import MapViewDirections from "react-native-maps-directions"
 import { variables } from '../../../Variables';
-import * as Device from 'expo-device'
 
 interface MapProps {
   customerAddress: {
@@ -24,19 +23,21 @@ interface MapProps {
 export const Map = (props: MapProps) => {
   let map: MapView;
 
-  const [usersCurrentLocation, setUsersCurrentLocation] = useState<Location.LocationObject>(undefined);
+  const [usersCurrentLocation, setCurrentPosition] = useState<Location.LocationObject>(undefined);
   const [isReady, setIsReady] = useState(false);
 
   useEffect(() => {
     setup();
   }, []);
 
-  const setup = async () => {
-    let location = await Location.getCurrentPositionAsync({ accuracy: Location.LocationAccuracy.BestForNavigation });
+  const setup = () => {
+    Location.watchPositionAsync({ accuracy: Location.LocationAccuracy.BestForNavigation }, location => {
+      setCurrentPosition(location);
 
-    setUsersCurrentLocation(location);
-
-    setIsReady(true);
+      if (!isReady) {
+        setIsReady(true);
+      }
+    });
   }
 
   return (
@@ -50,13 +51,13 @@ export const Map = (props: MapProps) => {
           width: '100%'
         }}
         camera={{
-          zoom: 12,
+          zoom: 16,
           center: {
             latitude: usersCurrentLocation?.coords.latitude,
             longitude: usersCurrentLocation?.coords.longitude,
           },
           altitude: usersCurrentLocation?.coords.altitude,
-          pitch: 80,
+          pitch: 40,
           heading: usersCurrentLocation.coords.heading
         }}
         mapPadding={{ bottom: 168, top: 0, left: 0, right: 0 }}

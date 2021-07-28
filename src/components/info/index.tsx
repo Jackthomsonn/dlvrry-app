@@ -104,7 +104,7 @@ export const Info = (props: InfoProps) => {
   }
 
   const riderIsWithinDistanceToCompleteJob = (destination: LatLng) => {
-    return haversine(currentPosition, destination, { unit: 'meter', threshold: 50 })
+    return haversine(currentPosition, destination, { unit: 'meter', threshold: 100 })
   }
 
   useEffect(() => {
