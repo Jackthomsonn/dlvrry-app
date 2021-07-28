@@ -26,7 +26,7 @@
       "config": {
         "googleMapsApiKey": "AIzaSyBO8cB32I8-0bgZSd1uxTrkZ0sGAp_hEDs"
       },
-      "buildNumber": "9",
+      "buildNumber": "10",
       "supportsTablet": true,
       "bundleIdentifier": "com.jackthomson.dlvrry",
       "infoPlist": {
@@ -34,6 +34,14 @@
         "NSLocationWhenInUseUsageDescription": "Dlvrry requires your location to autocomplete customers addresses and monitor a deliveries location for the end customer.",
         "NSLocationAlwaysUsageDescription": "Dlvrry requires your location to monitor a deliveries location for the end customer.",
         "NSLocationAlwaysAndWhenInUseUsageDescription": "Dlvrry requires your location to monitor a delivery for the end customer"
+      }
+    },
+    "android": {
+      "package": "com.jackthomson.dlvrry",
+      "config": {
+        "googleMaps": {
+          "apiKey": "AIzaSyDSh2Ds-Tur1zz1ReZUox3SS_wy6Duv5Hk"
+        }
       }
     },
     "extra": {
