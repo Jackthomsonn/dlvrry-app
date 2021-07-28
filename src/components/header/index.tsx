@@ -1,9 +1,6 @@
-import ActionSheet, {
-  addHasReachedTopListener,
-  removeHasReachedTopListener,
-} from 'react-native-actions-sheet';
+import ActionSheet from 'react-native-actions-sheet';
 import { Linking, Text, View } from 'react-native';
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { ScrollView, TouchableOpacity } from "react-native-gesture-handler";
 
 import { AccountType } from 'dlvrry-common';
@@ -30,27 +27,13 @@ interface HeaderProps {
 }
 
 export const Header = (props: HeaderProps) => {
-  const [ paymentMethods, setPaymentMethods ] = useState(undefined);
-  const [ isLoading, setIsLoading ] = useState(false);
-  const [ isGettingCards, setIsGettingCards ] = useState(false);
+  const [paymentMethods, setPaymentMethods] = useState(undefined);
+  const [isLoading, setIsLoading] = useState(false);
+  const [isGettingCards, setIsGettingCards] = useState(false);
 
   const actionSheetRef: React.MutableRefObject<any> = useRef();
   const scrollViewRef: React.MutableRefObject<any> = useRef();
   const navigation = useNavigation();
-
-  useEffect(() => {
-    addHasReachedTopListener(onHasReachedTop);
-    return () => {
-      removeHasReachedTopListener(onHasReachedTop);
-    };
-  }, []);
-
-  const onHasReachedTop = hasReachedTop => {
-    if (hasReachedTop)
-      scrollViewRef.current?.setNativeProps({
-        scrollEnabled: hasReachedTop,
-      });
-  };
 
   const onClose = () => {
     scrollViewRef.current?.setNativeProps({
