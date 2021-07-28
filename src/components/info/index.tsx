@@ -120,10 +120,10 @@ export const Info = (props: InfoProps) => {
     <>
       <View style={{
         position: 'absolute',
-        bottom: 168,
+        bottom: 0,
         borderTopLeftRadius: 20,
         borderTopRightRadius: 20,
-        height: '20%',
+        height: '40%',
         backgroundColor: variables.light,
         display: 'flex',
         flexDirection: 'column',

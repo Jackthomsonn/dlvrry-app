@@ -63,7 +63,7 @@ export function HomeScreen() {
         <Header main="Available" sub="jobs"></Header>
         <View style={{ padding: 24, flex: 1 }}>
           {
-            user.cancelled_jobs >= 5
+            user.cancelled_jobs >= 3
               ?
               <View style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}>
                 <SuspendedSvg width={180} height={180} />

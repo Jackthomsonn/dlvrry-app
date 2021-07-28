@@ -31,13 +31,10 @@ export const Map = (props: MapProps) => {
   }, []);
 
   const setup = () => {
-    Location.watchPositionAsync({ accuracy: Location.LocationAccuracy.BestForNavigation }, location => {
+    Location.getCurrentPositionAsync({ accuracy: Location.LocationAccuracy.BestForNavigation }).then(location => {
       setCurrentPosition(location);
-
-      if (!isReady) {
-        setIsReady(true);
-      }
-    });
+      setIsReady(true);
+    })
   }
 
   return (
@@ -60,7 +57,7 @@ export const Map = (props: MapProps) => {
           pitch: 40,
           heading: usersCurrentLocation.coords.heading
         }}
-        mapPadding={{ bottom: 168, top: 0, left: 0, right: 0 }}
+        mapPadding={{ bottom: 100, top: 0, left: 0, right: 0 }}
         showsPointsOfInterest={false}
         showsCompass={true}
         loadingEnabled={true}
