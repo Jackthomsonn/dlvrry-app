@@ -8,7 +8,6 @@
       "android",
       "web"
     ],
-    
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -27,19 +26,21 @@
       "config": {
         "googleMapsApiKey": "AIzaSyBO8cB32I8-0bgZSd1uxTrkZ0sGAp_hEDs"
       },
-      "buildNumber": "7",
+      "buildNumber": "8",
       "supportsTablet": true,
       "bundleIdentifier": "com.jackthomson.dlvrry",
       "infoPlist": {
-        "NSLocationUsageDescription": "The app needs permission to access your location, if you want to be located on the map.",
-        "NSLocationWhenInUseUsageDescription": "The app needs permission to access your location, if you want to be located on the map",
-        "NSLocationAlwaysUsageDescription": "The app needs permission to access your location, if you want to be located on the map",
-        "NSLocationAlwaysAndWhenInUseUsageDescription": "The app needs permission to access your location, if you want to be located on the map"
+        "NSLocationUsageDescription": "Dlvrry requires your location to autocomplete customers addresses and monitor a delivery for the end customer",
+        "NSLocationWhenInUseUsageDescription": "Dlvrry requires your location to autocomplete customers addresses and monitor a deliveries location for the end customer.",
+        "NSLocationAlwaysUsageDescription": "Dlvrry requires your location to monitor a deliveries location for the end customer.",
+        "NSLocationAlwaysAndWhenInUseUsageDescription": "Dlvrry requires your location to monitor a delivery for the end customer"
       }
     },
     "extra": {
-      "functionsUri": "https://us-central1-dlvrry-33018.cloudfunctions.net",
-      "useEmulator": false,
+      "functionsUri": "https://dlvrry-functions.ngrok.io/dlvrry-33018/us-central1",
+      "authUri": "https://dlvrry-auth.ngrok.io",
+      "firestoreHost": "dlvrry-firestore.ngrok.io",
+      "useEmulator": true,
       "apiKey": "AIzaSyCGDPRUz_vTChg2QDg-qMRlhxz7hGVlFFs",
       "authDomain": "dlvrry-33018.firebaseapp.com",
       "projectId": "dlvrry-33018",
