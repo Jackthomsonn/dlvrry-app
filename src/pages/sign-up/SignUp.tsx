@@ -1,5 +1,5 @@
 import { AccountType, ModeType, VerificationStatus } from 'dlvrry-common';
-import { Dimensions, KeyboardAvoidingView, StyleSheet, Text, View } from 'react-native';
+import { KeyboardAvoidingView, Platform, StyleSheet, Text, View } from 'react-native';
 import React, { useEffect, useState } from 'react';
 
 import { Button } from '../../components/button';
@@ -7,7 +7,6 @@ import DropDownPicker from 'react-native-dropdown-picker';
 import { Header } from '../../components/header';
 import { Input } from '../../components/input';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { ScrollView } from 'react-native-gesture-handler';
 import { User } from '../../services/user';
 import firebase from 'firebase';
 import { useForm } from 'react-hook-form';
@@ -18,14 +17,13 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: variables.pageBackgroundColor
   },
-  keyboardView: {
-    flex: 1,
-    margin: 24,
-  },
   errorText: {
     color: variables.warning,
     fontWeight: '700',
     marginBottom: 24
+  },
+  keyboardAvoidingView: {
+    flex: 1
   }
 });
 
@@ -123,11 +121,10 @@ export function SignUpScreen() {
 
   return (
     <SafeAreaView style={styles.host}>
-      <ScrollView>
+      <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "position" : "height"}>
         <Header main="Get" sub="started" showBackButton={true} />
-
-        <KeyboardAvoidingView behavior="position" keyboardVerticalOffset={50} style={styles.keyboardView}>
-          <Text style={{ marginBottom: 8 }}>Account type</Text>
+        <View style={{ margin: 24 }}>
+          <Text style={{ marginTop: 24, marginBottom: 8 }}>Account type</Text>
           <DropDownPicker
             defaultValue="rider"
             items={[
@@ -211,8 +208,8 @@ export function SignUpScreen() {
           <View style={{ marginTop: 12 }}>
             <Button showIcon={true} type="primary" title="Get started" onPress={handleSubmit(onSubmit)} loading={isLoading}></Button>
           </View>
-        </KeyboardAvoidingView>
-      </ScrollView>
+        </View>
+      </KeyboardAvoidingView>
     </SafeAreaView >
   );
 }

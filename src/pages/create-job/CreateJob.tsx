@@ -1,4 +1,4 @@
-import { KeyboardAvoidingView, StyleSheet, Text } from "react-native";
+import { KeyboardAvoidingView, Platform, StyleSheet, Text, View } from "react-native";
 import React, { useEffect, useState } from "react";
 
 import { Button } from "../../components/button";
@@ -138,47 +138,50 @@ export const CreateJobScreen = () => {
   return (
     <SafeAreaView style={styles.host}>
       <>
-        <Header main="Create" sub="job" showBackButton={true} />
-
         {
-          <KeyboardAvoidingView behavior={'position'} keyboardVerticalOffset={100} style={styles.keyboardView}>
-            <Text style={{ marginBottom: 8 }}>Cost (£)</Text>
+          <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "position" : "height"}>
+            <Header main="Create" sub="job" showBackButton={true} />
 
-            <Input keyboardType={'numbers-and-punctuation'} onChange={value => setValue('cost', value * 100)} />
+            <ScrollView showsVerticalScrollIndicator={false} style={{ margin: 24 }}>
 
-            {handleError('cost')}
+              <Text style={{ marginBottom: 8 }}>Cost (£)</Text>
 
-            <Text style={{ marginBottom: 8 }}>Number of items</Text>
+              <Input keyboardType={'numbers-and-punctuation'} onChange={value => setValue('cost', value * 100)} />
 
-            <Input keyboardType={'numbers-and-punctuation'} onChange={value => setValue('number_of_items', value)} />
+              {handleError('cost')}
 
-            {handleError('number_of_items')}
+              <Text style={{ marginBottom: 8 }}>Number of items</Text>
 
-            <Text style={{ marginBottom: 8 }}>Customer phone number (For delivery notifications)</Text>
+              <Input keyboardType={'numbers-and-punctuation'} onChange={value => setValue('number_of_items', value)} />
 
-            <Input keyboardType={'number-pad'} onChange={value => setValue('phone_number', value)} />
+              {handleError('number_of_items')}
 
-            {handleError('phone_number')}
+              <Text style={{ marginBottom: 8 }}>Customer phone number (For delivery notifications)</Text>
 
-            <Text style={{ marginBottom: 8 }}>Pickup location</Text>
+              <Input keyboardType={'number-pad'} onChange={value => setValue('phone_number', value)} />
 
-            <LocationPicker height={46} onChange={({ latitude, longitude, streetNumber, streetName }) => {
-              setValue('pickup_location', { latitude, longitude })
-              setValue('pickup_location_name', `${streetNumber} ${streetName}`)
-            }} />
+              {handleError('phone_number')}
 
-            {handleError('pickup_location')}
+              <Text style={{ marginBottom: 8 }}>Pickup location</Text>
 
-            <Text style={{ marginBottom: 8 }}>Customer location</Text>
+              <LocationPicker height={46} onChange={({ latitude, longitude, streetNumber, streetName }) => {
+                setValue('pickup_location', { latitude, longitude })
+                setValue('pickup_location_name', `${streetNumber} ${streetName}`)
+              }} />
 
-            <LocationPicker height={46} onChange={({ latitude, longitude, streetNumber, streetName }) => {
-              setValue('customer_location', { latitude, longitude })
-              setValue('customer_location_name', `${streetNumber} ${streetName}`)
-            }} />
+              {handleError('pickup_location')}
 
-            {handleError('customer_location')}
+              <Text style={{ marginBottom: 8 }}>Customer location</Text>
 
-            <Button showIcon={true} type="primary" title="Create job" onPress={handleSubmit(onSubmit)} loading={isSubmitting} ></Button>
+              <LocationPicker height={46} onChange={({ latitude, longitude, streetNumber, streetName }) => {
+                setValue('customer_location', { latitude, longitude })
+                setValue('customer_location_name', `${streetNumber} ${streetName}`)
+              }} />
+
+              {handleError('customer_location')}
+
+              <Button showIcon={true} type="primary" title="Create job" onPress={handleSubmit(onSubmit)} loading={isSubmitting} ></Button>
+            </ScrollView>
           </KeyboardAvoidingView>
         }
       </>

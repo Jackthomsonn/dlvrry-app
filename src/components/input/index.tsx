@@ -57,7 +57,7 @@ export const Input = (props: InputProps) => {
         secureTextEntry={props.secureTextEntry}
         keyboardType={props.keyboardType}
         onChangeText={value => props.onChange(value)}
-        returnKeyType={'default'}
+        returnKeyType={'done'}
         textContentType={props.textContentType}>
       </TextInput>
     </View >

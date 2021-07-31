@@ -18,8 +18,8 @@ export const LocationPicker = (props: { height: number, onChange: Function }) =>
         setLocationHeight(240)
       }
 
-      if (ref?.current?.isFocused()) {
-        setLocationHeight(240)
+      if (!ref?.current?.isFocused()) {
+        setLocationHeight(props.height)
       }
     }, 1000);
 
@@ -27,16 +27,6 @@ export const LocationPicker = (props: { height: number, onChange: Function }) =>
   }, []);
 
   const setup = async () => {
-    // const location_status = await Location.getForegroundPermissionsAsync();
-
-    // if (!location_status.granted) {
-    //   let { status } = await Location.requestForegroundPermissionsAsync();
-
-    //   if (status !== 'granted') {
-    //     alert('Location not granted');
-    //   }
-    // }
-
     let location = await Location.getCurrentPositionAsync({ accuracy: Location.LocationAccuracy.BestForNavigation });
 
     setCurrentLocation(`${location.coords.latitude}, ${location.coords.longitude}`);
