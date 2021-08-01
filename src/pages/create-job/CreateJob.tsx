@@ -13,6 +13,7 @@ import { User } from "../../services/user";
 import { useForm } from "react-hook-form";
 import { useNavigation } from "@react-navigation/native";
 import { variables } from "../../../Variables";
+import { isValidPhoneNumber, parsePhoneNumber } from "libphonenumber-js"
 
 const styles = StyleSheet.create({
   host: {
@@ -124,7 +125,21 @@ export const CreateJobScreen = () => {
       }
     });
     register('phone_number', {
-      required: false
+      required: {
+        message: 'You must specify the customer phone number for parcel tracking',
+        value: true,
+      },
+      validate: (number) => {
+        console.log(number)
+        if (!isValidPhoneNumber(number, "GB")) {
+          return "You must provide a valid phone number"
+        }
+      },
+      setValueAs: (number) => {
+
+        console.log("PARSE")
+        return parsePhoneNumber(number, "GB").number;
+      }
     });
 
     setSessionToken(new Date().valueOf().toString());

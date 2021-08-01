@@ -1,6 +1,6 @@
 import { IJob, IUser, JobStatus } from "dlvrry-common";
 import React, { useEffect, useState } from "react";
-import { Text, View } from "react-native";
+import { Linking, Text, View } from "react-native";
 
 import { Button } from "../button";
 import { Job } from "../../services/job";
@@ -12,6 +12,8 @@ import haversine from 'haversine';
 import { LatLng } from "react-native-maps";
 import { User } from '../../services/user';
 import { useDocumentData } from "react-firebase-hooks/firestore";
+import { format } from "libphonenumber-js";
+
 
 interface InfoProps {
   job: IJob,
@@ -105,6 +107,10 @@ export const Info = (props: InfoProps) => {
     return haversine(currentPosition, destination, { unit: 'meter', threshold: 100 })
   }
 
+  const openPhoneCaller = async () => {
+    await Linking.openURL(`tel:${format(props.job.phone_number, "NATIONAL")}`)
+  }
+
   useEffect(() => {
     Location.watchPositionAsync({ accuracy: Location.LocationAccuracy.BestForNavigation }, location => {
       setCurrentPosition({
@@ -148,7 +154,7 @@ export const Info = (props: InfoProps) => {
         <View style={{ flexDirection: 'row', height: 50, backgroundColor: variables.light, }}>
           <View style={{ borderTopRightRadius: 50, width: '50%', justifyContent: 'center', alignItems: 'center' }}>
             <Text style={{ fontWeight: '500', color: variables.primaryColor, fontSize: 16, ...variables.fontStyle }}>Phone number</Text>
-            <Text style={{ fontWeight: '700', color: variables.secondaryColor, fontSize: 18, ...variables.fontStyle }}>{props.job.phone_number ? props.job.phone_number : 'N/A'}</Text>
+            <Text onPress={openPhoneCaller} style={{ fontWeight: '700', color: variables.secondaryColor, fontSize: 18, ...variables.fontStyle }}>{props.job.phone_number ? format(props.job.phone_number, "NATIONAL") : 'N/A'}</Text>
           </View>
           <View style={{ borderTopRightRadius: 50, width: '50%', justifyContent: 'center', alignItems: 'center' }}>
             <Text style={{ fontWeight: '500', color: variables.primaryColor, fontSize: 16, ...variables.fontStyle }}>Job ID</Text>

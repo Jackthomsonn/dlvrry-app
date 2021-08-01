@@ -35,6 +35,7 @@
     "expo-web-browser": "~9.2.0",
     "firebase": "8.2.3",
     "haversine": "^1.1.1",
+    "libphonenumber-js": "^1.9.23",
     "moment": "^2.29.1",
     "react": "16.13.1",
     "react-dom": "16.13.1",
