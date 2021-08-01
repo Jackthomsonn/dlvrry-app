@@ -13,7 +13,6 @@ import { User } from "../../services/user";
 import { useForm } from "react-hook-form";
 import { useNavigation } from "@react-navigation/native";
 import { variables } from "../../../Variables";
-import { ScrollView } from "react-native-gesture-handler";
 
 const styles = StyleSheet.create({
   host: {
@@ -42,6 +41,8 @@ export const CreateJobScreen = () => {
   const navigation = useNavigation();
 
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const [sessionToken, setSessionToken] = useState("");
 
   const { register, handleSubmit, setValue, errors } = useForm();
 
@@ -88,8 +89,8 @@ export const CreateJobScreen = () => {
         value: true
       },
       min: {
-        message: 'You must enter a minimum amount of £7',
-        value: 700
+        message: 'You must enter a minimum amount of £5',
+        value: 500,
       },
       valueAsNumber: true
     });
@@ -125,6 +126,8 @@ export const CreateJobScreen = () => {
     register('phone_number', {
       required: false
     });
+
+    setSessionToken(new Date().valueOf().toString());
   }
 
   const handleError = (modelName: string) => {
@@ -139,11 +142,10 @@ export const CreateJobScreen = () => {
     <SafeAreaView style={styles.host}>
       <>
         {
-          <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "position" : "height"}>
+          <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "position" : "height"} keyboardVerticalOffset={100}>
             <Header main="Create" sub="job" showBackButton={true} />
 
-            <ScrollView showsVerticalScrollIndicator={false} style={{ margin: 24 }}>
-
+            <View style={{ margin: 24 }}>
               <Text style={{ marginBottom: 8 }}>Cost (£)</Text>
 
               <Input keyboardType={'numbers-and-punctuation'} onChange={value => setValue('cost', value * 100)} />
@@ -164,7 +166,7 @@ export const CreateJobScreen = () => {
 
               <Text style={{ marginBottom: 8 }}>Pickup location</Text>
 
-              <LocationPicker height={46} onChange={({ latitude, longitude, streetNumber, streetName }) => {
+              <LocationPicker sessionToken={sessionToken} height={46} onChange={({ latitude, longitude, streetNumber, streetName }) => {
                 setValue('pickup_location', { latitude, longitude })
                 setValue('pickup_location_name', `${streetNumber} ${streetName}`)
               }} />
@@ -173,7 +175,7 @@ export const CreateJobScreen = () => {
 
               <Text style={{ marginBottom: 8 }}>Customer location</Text>
 
-              <LocationPicker height={46} onChange={({ latitude, longitude, streetNumber, streetName }) => {
+              <LocationPicker sessionToken={sessionToken} height={46} onChange={({ latitude, longitude, streetNumber, streetName }) => {
                 setValue('customer_location', { latitude, longitude })
                 setValue('customer_location_name', `${streetNumber} ${streetName}`)
               }} />
@@ -181,7 +183,7 @@ export const CreateJobScreen = () => {
               {handleError('customer_location')}
 
               <Button showIcon={true} type="primary" title="Create job" onPress={handleSubmit(onSubmit)} loading={isSubmitting} ></Button>
-            </ScrollView>
+            </View>
           </KeyboardAvoidingView>
         }
       </>

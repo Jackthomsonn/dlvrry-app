@@ -1,12 +1,12 @@
 import * as Location from 'expo-location';
 
 import React, { useEffect, useRef, useState } from "react";
+import { View } from 'react-native';
 
 import { GooglePlacesAutocomplete } from "react-native-google-places-autocomplete";
 import { Loader } from '../loader';
-import { View } from 'react-native';
 
-export const LocationPicker = (props: { height: number, onChange: Function }) => {
+export const LocationPicker = (props: { height: number, onChange: Function, sessionToken: string }) => {
   const ref: any = useRef();
   const [locationHeight, setLocationHeight] = useState(props.height);
   const [currentLocation, setCurrentLocation] = useState(undefined);
@@ -68,7 +68,7 @@ export const LocationPicker = (props: { height: number, onChange: Function }) =>
               radius: '8100',
               strictbounds: true,
               key: 'AIzaSyCGDPRUz_vTChg2QDg-qMRlhxz7hGVlFFs',
-              sessiontoken: new Date().valueOf(),
+              sessiontoken: props.sessionToken,
               language: 'en'
             }}
           />

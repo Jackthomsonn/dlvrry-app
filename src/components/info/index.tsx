@@ -68,8 +68,6 @@ export const Info = (props: InfoProps) => {
       setCurrentProgress('in_progress');
 
       alert(e);
-
-      navigation.goBack();
     }
   }
 
