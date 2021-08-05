@@ -69,7 +69,9 @@ export const Info = (props: InfoProps) => {
 
       setCurrentProgress('in_progress');
 
-      alert(e);
+      alert("Whoops! Something went wrong on our end! Our automated systems are looking into this now. Please be assured we will have this problem sorted in no time!");
+
+      navigation.goBack();
     }
   }
 
