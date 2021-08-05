@@ -30,8 +30,8 @@ const styles = StyleSheet.create({
 });
 
 export function LoginScreen() {
-  const { register, handleSubmit, setValue, errors, getValues } = useForm();
-  const [ isLoading, setIsLoading ] = useState(false);
+  const { register, handleSubmit, setValue, errors, getValues, setError } = useForm();
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     register('email', {
@@ -47,7 +47,9 @@ export function LoginScreen() {
         value: true
       }
     });
-  }, [ register ])
+
+    register('firebaseErrors');
+  }, [register])
 
   const onSubmit = async () => {
     setIsLoading(true);
@@ -60,8 +62,8 @@ export function LoginScreen() {
 
       User.authenticated.next(result.user);
     } catch (e) {
-      alert(e.message);
       setIsLoading(false);
+      setError('firebaseErrors', { message: e.message })
     }
   }
 
@@ -85,6 +87,12 @@ export function LoginScreen() {
         {
           errors.password
             ? <Text style={styles.errorText}>{errors.password.message}</Text>
+            : undefined
+        }
+
+        {
+          errors.firebaseErrors
+            ? <Text style={styles.errorText}>{errors.firebaseErrors.message}</Text>
             : undefined
         }
 

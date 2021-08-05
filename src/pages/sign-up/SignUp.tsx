@@ -116,6 +116,7 @@ export function SignUpScreen() {
 
       setIsLoading(false);
     } catch (error) {
+      setIsLoading(false)
       setError('firebaseErrors', { message: error.message })
     }
   }
