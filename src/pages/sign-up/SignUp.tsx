@@ -68,6 +68,7 @@ export function SignUpScreen() {
     register('firebaseErrors');
 
     setValue('account_type', AccountType.RIDER);
+    setValue('mode', ModeType.BICYCLING);
   }, [register])
 
   const onSubmit = async () => {
@@ -126,7 +127,7 @@ export function SignUpScreen() {
         <View style={{ margin: 24 }}>
           <Text style={{ marginTop: 24, marginBottom: 8 }}>Account type</Text>
           <DropDownPicker
-            defaultValue="rider"
+            defaultValue={AccountType.RIDER}
             items={[
               { label: 'Rider', value: AccountType.RIDER },
               { label: 'Business', value: AccountType.BUSINESS, }
@@ -161,13 +162,14 @@ export function SignUpScreen() {
                 <Text style={{ marginBottom: 8, marginTop: 12 }}>How will you be delivering goods?</Text>
                 <DropDownPicker
                   placeholder={'Select a mode of transport'}
+                  defaultValue={ModeType.BICYCLING}
                   items={[
                     { label: 'Bike', value: ModeType.BICYCLING },
                     { label: 'Car', value: ModeType.DRIVING },
                   ]}
                   containerStyle={{ height: 40, marginBottom: 12 }}
                   itemStyle={{ justifyContent: 'flex-start' }}
-                  onChangeItem={response => { setValue('mode', response.value); console.log(response) }}
+                  onChangeItem={response => { setValue('mode', response.value) }}
                 />
 
                 {
