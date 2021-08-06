@@ -110,7 +110,11 @@ export const Info = (props: InfoProps) => {
   }
 
   const openPhoneCaller = async () => {
-    await Linking.openURL(`tel:${format(props.job.phone_number, "NATIONAL")}`)
+    try {
+      await Linking.openURL(`tel:${format(props.job.phone_number, "NATIONAL")}`)
+    } catch (e) {
+      alert("There was an error when trying to open up the phone dialer");
+    }
   }
 
   useEffect(() => {

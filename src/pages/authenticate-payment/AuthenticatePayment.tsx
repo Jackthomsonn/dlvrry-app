@@ -10,7 +10,7 @@ export function AuthenticatePaymentScreen(props: any) {
   const [inProgress, setInProgress] = useState(true);
 
   const url = Constants.manifest.extra.useEmulator
-    ? 'https://dlvrry-payment-hgwx8lxfr-jackthomson.vercel.app'
+    ? 'https://dlvrry-payment-73qhm5isg-jackthomson.vercel.app' // Dev
     : 'https://payment.dlvrry.io'
 
   return (

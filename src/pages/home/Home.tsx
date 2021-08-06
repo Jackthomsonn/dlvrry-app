@@ -1,6 +1,6 @@
 import { AccountType, IJob, IUser, JobStatus } from 'dlvrry-common';
-import { Platform, SafeAreaView, SectionList, StyleSheet, Text, View } from 'react-native';
-import React, { useState } from 'react';
+import { Linking, Platform, SafeAreaView, SectionList, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import React, { useEffect, useLayoutEffect, useState } from 'react';
 import { useCollectionData, useDocumentData } from 'react-firebase-hooks/firestore';
 import { useFocusEffect, useNavigation } from "@react-navigation/native";
 
@@ -15,6 +15,7 @@ import NoResultsSvg from '../../components/svg/no-results';
 import { User } from "../../services/user";
 import { variables } from '../../../Variables';
 
+import * as Location from 'expo-location';
 import * as Notifications from 'expo-notifications';
 import SuspendedSvg from '../../components/svg/suspended';
 import WaitingSvg from '../../components/svg/waiting';
@@ -31,6 +32,7 @@ export function HomeScreen() {
 
   const [businessHasConnectedCard, setBusinessHasConnectedCard] = useState(false);
   const [user] = useDocumentData<IUser>(User.getUser(User.storedUserId));
+  const [allowsLocation, setAllowsLocation] = useState(true);
 
   const [allJobs, allJobsLoading, allJobsError] = useCollectionData<IJob>(
     user?.account_type === AccountType.RIDER
@@ -61,7 +63,7 @@ export function HomeScreen() {
     return (
       <>
         <Header main="Available" sub="jobs"></Header>
-        <View style={{ padding: 24, flex: 1 }}>
+        <View style={{ flex: 1 }}>
           {
             user.cancelled_jobs >= 3
               ?
@@ -73,7 +75,13 @@ export function HomeScreen() {
               </View>
               :
               allJobs?.length > 0
-                ? <FlatList showsVerticalScrollIndicator={false} data={allJobs} keyExtractor={(_item, index) => index.toString()} renderItem={({ item }) => <JobCard user={user} job={item} account_type={user.account_type} />}></FlatList>
+                ? <FlatList showsVerticalScrollIndicator={false} data={allJobs} keyExtractor={(_item, index) => index.toString()} renderItem={({ item }) => {
+                  return (
+                    <View style={{ padding: 24 }}>
+                      <JobCard user={user} job={item} account_type={user.account_type} />
+                    </View>
+                  )
+                }}></FlatList>
                 : <>
                   <View style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}>
                     <NoResultsSvg width={180} height={180} />
@@ -91,13 +99,18 @@ export function HomeScreen() {
       <>
         <Header main="Your listed" sub="jobs"></Header>
         <View style={{
-          padding: 24,
           flex: 1
         }}>
           <SectionList
             showsHorizontalScrollIndicator={false}
             showsVerticalScrollIndicator={false}
-            renderItem={({ item, index }) => <JobCard key={index} user={user} job={item} account_type={user.account_type} />}
+            renderItem={({ item, index }) => {
+              return (
+                <View style={{ padding: 24 }}>
+                  <JobCard key={index} user={user} job={item} account_type={user.account_type} />
+                </View>
+              )
+            }}
             keyExtractor={(item, index) => item.id}
             renderSectionHeader={({ section: { title } }) => (
               <View style={{ backgroundColor: variables.pageBackgroundColor }}>
@@ -150,6 +163,7 @@ export function HomeScreen() {
       const { status: existingStatus } = await Notifications.getPermissionsAsync();
 
       let finalStatus = existingStatus;
+
       if (existingStatus !== 'granted') {
         const { status } = await Notifications.requestPermissionsAsync();
         finalStatus = status;
@@ -175,36 +189,79 @@ export function HomeScreen() {
     return token;
   }
 
-  useFocusEffect(() => {
-    getConnectedCards();
+  const openAppSettings = () => {
+    Linking.openSettings()
+  }
 
-    Notifications.getPermissionsAsync().then(() => {
-      registerForPushNotificationsAsync().then(async (token) => {
-        await User.updateUser(User.storedUser.id, { push_token: token })
+  useEffect(() => {
+    try {
+      Notifications.getPermissionsAsync().then(() => {
+        registerForPushNotificationsAsync().then(async (token) => {
+          await User.updateUser(User.storedUser.id, { push_token: token })
+        });
       });
-    });
-  })
+
+      Location.getForegroundPermissionsAsync().then(async (location_status) => {
+        if (!location_status.granted) {
+          let { status } = await Location.requestForegroundPermissionsAsync();
+
+          if (status !== 'granted') {
+            setAllowsLocation(false);
+          } else {
+            setAllowsLocation(true);
+          }
+        } else {
+          setAllowsLocation(true);
+        }
+      });
+    } catch (e) {
+      alert(e);
+    }
+  }, []);
+
+  useFocusEffect(() => {
+    if (user?.account_type === AccountType.BUSINESS) {
+      try {
+        getConnectedCards();
+      } catch (e) {
+        alert("There was an error when trying to get your cards");
+      }
+    }
+  });
 
   return (
     <SafeAreaView style={styles.host}>
       {
-        user?.verified ?
-          allJobsLoading
-            ? <Loader />
-            : user?.account_type === AccountType.RIDER
-              ? riderView()
-              : businessView()
-          : <View style={{ padding: 24, display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}>
-            <WaitingSvg width={180} height={180} />
-            <Text style={{ fontWeight: '500', color: variables.secondaryColor, fontSize: 16, ...variables.fontStyle, marginTop: 12, textAlign: 'center' }}>
-              Your account is pending manual verification. You will receive an email when your account has been verified this takes around 24-48 hours to complete
-            </Text>
-          </View>
-      }
+        !allowsLocation
+          ?
+          <>
+            <Header main="" sub="" />
+            <View style={{ margin: 24, display: 'flex', justifyContent: 'center', alignItems: 'center', height: '80%' }}>
+              <SuspendedSvg width={180} height={180} />
+              <Text style={{ marginBottom: 24, fontWeight: '500', color: variables.secondaryColor, fontSize: 16, ...variables.fontStyle, marginTop: 12, textAlign: 'center' }}>
+                You must allow location tracking to use Dlvrry. We use your location data to show jobs near you as a rider & as a business to find addresses for your customers' deliveries. You can enable location services by clicking the button below
+              </Text>
+              <Button type="primary" title="Open app settings" onPress={openAppSettings} />
+            </View></>
+          : <>
+            {
+              user?.verified ?
+                allJobsLoading
+                  ? <Loader />
+                  : user?.account_type === AccountType.RIDER
+                    ? riderView()
+                    : businessView()
+                : <View style={{ padding: 24, display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}>
+                  <WaitingSvg width={180} height={180} />
+                  <Text style={{ fontWeight: '500', color: variables.secondaryColor, fontSize: 16, ...variables.fontStyle, marginTop: 12, textAlign: 'center' }}>
+                    Your account is pending manual verification. You will receive an email when your account has been verified this takes around 24-48 hours to complete
+                  </Text>
+                </View>
+            }
 
-      <Text>{allJobsError ?? allJobsError}</Text>
-      {/* <Text>{jobsCompletedError ?? jobsCompletedError}</Text> */}
-      {/* <Text>{jobsAwaitingPaymentError ?? jobsAwaitingPaymentError}</Text> */}
+            <Text>{allJobsError ?? allJobsError}</Text>
+          </>
+      }
 
     </SafeAreaView >
   );

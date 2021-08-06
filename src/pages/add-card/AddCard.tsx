@@ -12,7 +12,7 @@ export function AddCardScreen(props: any) {
   const [token, setToken] = useState(undefined);
 
   const url = Constants.manifest.extra.useEmulator
-    ? 'https://dlvrry-payment-hgwx8lxfr-jackthomson.vercel.app'
+    ? 'https://dlvrry-payment-73qhm5isg-jackthomson.vercel.app' // Dev
     : 'https://payment.dlvrry.io'
 
   const getToken = async () => {
@@ -22,7 +22,11 @@ export function AddCardScreen(props: any) {
   }
 
   useEffect(() => {
-    getToken();
+    try {
+      getToken();
+    } catch (e) {
+      alert("There was an error getting a token")
+    }
   }, [])
 
   return (

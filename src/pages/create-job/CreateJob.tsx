@@ -1,4 +1,4 @@
-import { KeyboardAvoidingView, Platform, StyleSheet, Text, View } from "react-native";
+import { KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text, View } from "react-native";
 import React, { useEffect, useState } from "react";
 
 import { Button } from "../../components/button";
@@ -157,10 +157,10 @@ export const CreateJobScreen = () => {
     <SafeAreaView style={styles.host}>
       <>
         {
-          <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "position" : "height"} keyboardVerticalOffset={100}>
-            <Header main="Create" sub="job" showBackButton={true} />
+          <KeyboardAvoidingView enabled behavior={Platform.OS === "ios" ? "padding" : "height"} style={{ flex: 1 }}>
+            <Header hideAvatar={true} main="Create" sub="job" showBackButton={true} />
 
-            <View style={{ margin: 24 }}>
+            <ScrollView keyboardShouldPersistTaps={'always'} style={{ margin: 24, flex: 1 }} showsVerticalScrollIndicator={false}>
               <Text style={{ marginBottom: 8 }}>Cost (£)</Text>
 
               <Input keyboardType={'numbers-and-punctuation'} onChange={value => setValue('cost', value * 100)} />
@@ -198,7 +198,7 @@ export const CreateJobScreen = () => {
               {handleError('customer_location')}
 
               <Button showIcon={true} type="primary" title="Create job" onPress={handleSubmit(onSubmit)} loading={isSubmitting} ></Button>
-            </View>
+            </ScrollView>
           </KeyboardAvoidingView>
         }
       </>

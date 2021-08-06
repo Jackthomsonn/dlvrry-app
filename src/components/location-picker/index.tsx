@@ -23,7 +23,11 @@ export const LocationPicker = (props: { height: number, onChange: Function, sess
       }
     }, 1000);
 
-    setup();
+    try {
+      setup();
+    } catch (e) {
+      alert(e);
+    }
   }, []);
 
   const setup = async () => {

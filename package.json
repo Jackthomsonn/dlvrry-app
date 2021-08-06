@@ -58,7 +58,8 @@
     "rxjs": "^6.6.3",
     "stripe": "^8.131.1",
     "stripe-client": "^1.1.5",
-    "uuid": "^8.3.2"
+    "uuid": "^8.3.2",
+    "expo-intent-launcher": "~9.1.0"
   },
   "devDependencies": {
     "@babel/core": "~7.9.0",

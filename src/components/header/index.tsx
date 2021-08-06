@@ -146,12 +146,18 @@ export const Header = (props: HeaderProps) => {
   }
 
   const goToDashboard = async () => {
-    setIsLoading(true);
+    try {
+      setIsLoading(true);
 
-    const loginLink = await User.getLoginLink(User.storedUserId);
+      const loginLink = await User.getLoginLink(User.storedUserId);
 
-    setIsLoading(false);
-    Linking.openURL(loginLink.data.url);
+      setIsLoading(false);
+
+      Linking.openURL(loginLink.data.url);
+    } catch (e) {
+      alert("Whoops! Something went wrong our end");
+      setIsLoading(false);
+    }
   }
 
   const logout = async () => {
@@ -159,19 +165,24 @@ export const Header = (props: HeaderProps) => {
   }
 
   const getCards = async () => {
-    setIsGettingCards(true);
+    try {
+      setIsGettingCards(true);
 
-    if (!User.storedUser || !User.storedUser.customer_id) {
+      if (!User.storedUser || !User.storedUser.customer_id) {
+        setIsGettingCards(false);
+
+        return;
+      }
+
+      const response = await User.getCards(User.storedUser.customer_id);
+
+      setPaymentMethods(response.data);
+
       setIsGettingCards(false);
-
-      return;
+    } catch (e) {
+      alert("Whoops something went wrong our end!");
+      setIsGettingCards(false);
     }
-
-    const response = await User.getCards(User.storedUser.customer_id);
-
-    setPaymentMethods(response.data);
-
-    setIsGettingCards(false);
   }
 
   const setupCard = async () => {
@@ -196,7 +207,7 @@ export const Header = (props: HeaderProps) => {
 
   return (
     <>
-      <View style={{ paddingTop: 24, paddingLeft: props.hideAvatar ? 0 : 24, paddingRight: 24, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+      <View style={{ paddingTop: 24, paddingLeft: props.hideAvatar ? 24 : 24, paddingRight: 24, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
         {
           props.showBackButton
             ? <View style={{ flexDirection: 'row', flex: 1 }}>

@@ -1,5 +1,5 @@
 import { AccountType, ModeType, VerificationStatus } from 'dlvrry-common';
-import { KeyboardAvoidingView, Platform, StyleSheet, Text, View } from 'react-native';
+import { KeyboardAvoidingView, Linking, Platform, StyleSheet, Text, View } from 'react-native';
 import React, { useEffect, useState } from 'react';
 
 import { Button } from '../../components/button';
@@ -11,6 +11,7 @@ import { User } from '../../services/user';
 import firebase from 'firebase';
 import { useForm } from 'react-hook-form';
 import { variables } from '../../../Variables';
+import { ScrollView } from 'react-native-gesture-handler';
 
 const styles = StyleSheet.create({
   host: {
@@ -121,11 +122,15 @@ export function SignUpScreen() {
     }
   }
 
+  const openTermsAndConditions = () => {
+    Linking.openURL("https://www.dlvrry.io/terms-and-conditions")
+  }
+
   return (
     <SafeAreaView style={styles.host}>
-      <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "position" : "height"}>
+      <KeyboardAvoidingView enabled behavior={Platform.OS === "ios" ? "padding" : "height"} style={{ flex: 1 }}>
         <Header main="Get" sub="started" showBackButton={true} />
-        <View style={{ margin: 24 }}>
+        <ScrollView style={{ margin: 24, flex: 1 }} showsVerticalScrollIndicator={false}>
           <Text style={{ marginTop: 24, marginBottom: 8 }}>Account type</Text>
           <DropDownPicker
             defaultValue={AccountType.RIDER}
@@ -206,12 +211,11 @@ export function SignUpScreen() {
               : undefined
           }
 
-          <Text style={{ fontWeight: '500' }}>By clicking the 'Get Started' button below you accept the terms and conditions set out by us, Dlvrry</Text>
-
           <View style={{ marginTop: 12 }}>
+            <Text style={{ marginBottom: 24, fontWeight: '500' }}>By clicking the 'Get Started' button below you accept the <Text onPress={openTermsAndConditions} style={{ fontWeight: '700', color: variables.primaryColor }}>terms and conditions</Text> set out by us, Dlvrry</Text>
             <Button showIcon={true} type="primary" title="Get started" onPress={handleSubmit(onSubmit)} loading={isLoading}></Button>
           </View>
-        </View>
+        </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView >
   );

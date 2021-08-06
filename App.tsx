@@ -37,7 +37,6 @@ const Tab = createBottomTabNavigator();
 export default function App() {
   const [isLoggedIn, setLoggedInState] = useState(false);
   const [isLoading, setIsLoadingState] = useState(true);
-  const [allowsLocation, setAllowsLocation] = useState(true)
 
   if (firebase.apps.length === 0) {
     const fi = firebase.initializeApp({
@@ -62,11 +61,17 @@ export default function App() {
 
   firebase.auth().onAuthStateChanged(async user => {
     if (user) {
-      User.storedUserId = user.uid;
-      const userData: any = await User.getUser(user.uid).get();
-      User.storedUser = userData.data();
-      setIsLoadingState(false);
-      setLoggedInState(true);
+      try {
+        User.storedUserId = user.uid;
+        const userData: any = await User.getUser(user.uid).get();
+        User.storedUser = userData.data();
+        setIsLoadingState(false);
+        setLoggedInState(true);
+      } catch (e) {
+        alert(e);
+        setLoggedInState(false);
+        setIsLoadingState(false);
+      }
     }
 
     if (!user) {
@@ -83,51 +88,24 @@ export default function App() {
     }
   });
 
-  useEffect(() => {
-    Location.getForegroundPermissionsAsync().then(async (location_status) => {
-      if (!location_status.granted) {
-        let { status } = await Location.requestForegroundPermissionsAsync();
-
-        if (status !== 'granted') {
-          setAllowsLocation(false);
-        } else {
-          setAllowsLocation(true);
-        }
-      } else {
-        setAllowsLocation(true);
-      }
-    })
-  }, []);
-
   return (
     <NavigationContainer>
-      {
-        allowsLocation
-          ? <Tab.Navigator tabBarOptions={{ showLabel: false }} screenOptions={{ tabBarVisible: isLoggedIn }}>
-            {
-              isLoading ? (
-                <Tab.Screen name="Splash" component={SplashScreen} />
-              ) : isLoggedIn ? (
-                <React.Fragment>
-                  <Tab.Screen name="Home" component={HomeStackScreen} options={{
-                    tabBarVisible: false,
-                  }} />
-                  <Tab.Screen name="Rider" component={RiderScreen} options={{
-                    tabBarVisible: false,
-                  }} />
-                </React.Fragment>
-              ) : (<Tab.Screen name="Login" component={AuthStackScreen} />)
-            }
-          </Tab.Navigator>
-          : <>
-            <View style={{ margin: 24, display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}>
-              <SuspendedSvg width={180} height={180} />
-              <Text style={{ fontWeight: '500', color: variables.secondaryColor, fontSize: 16, ...variables.fontStyle, marginTop: 12, textAlign: 'center' }}>
-                You must allow location tracking to use Dlvrry. We use your location data to show jobs near you as a rider & as a business to find addresses for your customers' deliveries
-              </Text>
-            </View>
-          </>
-      }
+      <Tab.Navigator tabBarOptions={{ showLabel: false }} screenOptions={{ tabBarVisible: isLoggedIn }}>
+        {
+          isLoading ? (
+            <Tab.Screen name="Splash" component={SplashScreen} />
+          ) : isLoggedIn ? (
+            <React.Fragment>
+              <Tab.Screen name="Home" component={HomeStackScreen} options={{
+                tabBarVisible: false,
+              }} />
+              <Tab.Screen name="Rider" component={RiderScreen} options={{
+                tabBarVisible: false,
+              }} />
+            </React.Fragment>
+          ) : (<Tab.Screen name="Login" component={AuthStackScreen} />)
+        }
+      </Tab.Navigator>
 
     </NavigationContainer>
   );

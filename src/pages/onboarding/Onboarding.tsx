@@ -60,37 +60,41 @@ const styles = StyleSheet.create({
 export function OnboardingScreen() {
   const navigation = useNavigation();
 
-  const [ accountHasPendingActions, setAccountHasPendingActions ] = useState(false);
-  const [ checkingForPendingAccountActions, setCheckingForPendingAccountActions ] = useState(false);
-  const [ loginLink, setLoginLink ] = useState(undefined);
-  const [ onboardingActionIsInProcess, setOnboardingActionIsInProcess ] = useState(false);
+  const [accountHasPendingActions, setAccountHasPendingActions] = useState(false);
+  const [checkingForPendingAccountActions, setCheckingForPendingAccountActions] = useState(false);
+  const [loginLink, setLoginLink] = useState(undefined);
+  const [onboardingActionIsInProcess, setOnboardingActionIsInProcess] = useState(false);
 
-  const [ user ] = useDocumentData<IUser>(User.getUser(User.storedUserId));
+  const [user] = useDocumentData<IUser>(User.getUser(User.storedUserId));
 
   const startOnboardingProcess = async () => {
     if (onboardingActionIsInProcess) return;
 
     const redirectUri = AuthSession.makeRedirectUri({ useProxy: true });
 
-    const response = await User.onboardUser(
-      user.id,
-      user.email,
-      `${ Constants.manifest.extra.functionsUri }/refreshAccountLink`,
-      redirectUri
-    );
+    try {
+      const response = await User.onboardUser(
+        user.id,
+        user.email,
+        `${Constants.manifest.extra.functionsUri}/refreshAccountLink`,
+        redirectUri
+      );
 
-    const result = await AuthSession.startAsync({
-      authUrl: `${ response.data }?redirect_uri=${ redirectUri }`
-    });
+      const result = await AuthSession.startAsync({
+        authUrl: `${response.data}?redirect_uri=${redirectUri}`
+      });
 
-    // Handle these cases correctly
-    if (result.type === 'success') {
-      setOnboardingActionIsInProcess(false);
-    }
+      // Handle these cases correctly
+      if (result.type === 'success') {
+        setOnboardingActionIsInProcess(false);
+      }
 
-    if (result.type === 'error' || result.type === 'cancel') {
-      alert('Something went wrong');
-      setOnboardingActionIsInProcess(false);
+      if (result.type === 'error' || result.type === 'cancel') {
+        alert('Something went wrong');
+        setOnboardingActionIsInProcess(false);
+      }
+    } catch (e) {
+      alert("Something went wrong")
     }
   }
 
@@ -133,7 +137,7 @@ export function OnboardingScreen() {
           <View style={styles.verifyBox}>
             <Text style={styles.text}>
               It looks like you have some outstanding actions on your account. In order to continue using Dlvrry please click the link below
-              </Text>
+            </Text>
           </View>
           <View style={styles.loginLinkHost}>
             {
@@ -168,7 +172,7 @@ export function OnboardingScreen() {
 
   useEffect(() => {
     handleUserVerificationStatus();
-  }, [ user ]);
+  }, [user]);
 
   return (
     <SafeAreaView style={styles.host}>
